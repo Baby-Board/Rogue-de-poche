@@ -134,6 +134,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:800;letter-spacing:.01em;text-
 .dock>div{width:100%;max-width:528px;display:flex;gap:8px}
 .dock .btn{flex:1}
 .dock .btn.ghost{flex:0 0 auto;width:auto}
+.dock{flex-direction:column;align-items:center;gap:8px}.dock>.confirm{width:100%;max-width:528px}.dock .confirm .row2{display:flex;gap:8px}
 
 /* ---------- Top bar ---------- */
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:6px;padding-block:9px 10px;margin-inline:-16px;padding-inline:16px;background:linear-gradient(180deg,rgba(10,22,20,.97) 70%,rgba(10,22,20,0));backdrop-filter:blur(3px)}
@@ -1168,8 +1169,7 @@ function vHome(){
       ${has&&sel?`<small style="color:var(--brass2);font-weight:800">Run en cours · zone ${run.z+1}/${ZONES} · ${stars(run.star)}</small>`:''}
       ${sel&&!lock&&!has?`<div class="stars" role="group" aria-label="Difficulté">${[1,2,3,4,5].map(s=>`<span class="star ${s<=ui.star?'on':''} ${s>M.starMax?'lock':''}" ${s<=M.starMax?`data-a="star" data-v="${s}"`:''}>${s>M.starMax?ico('lock'):ico('star')}</span>`).join('')}</div><small style="margin-top:6px">${stars(ui.star)} ${STAR_DESC[ui.star-1]}${M.starMax<5?`. Gagne en ${'★'.repeat(M.starMax)} pour débloquer la suivante.`:'.'}</small>`:''}
       </div></button>`}).join('')}</div>
-  ${ui.confirm==='abandon'?`<div class="confirm"><p>Abandonner la run en cours ? Tu perds les héros, l'équipement et les écus.</p><div class="row2"><button class="btn" data-a="confirm" data-v="">Annuler</button><button class="btn main" data-a="abandon">Abandonner</button></div></div>`:''}
-  <div class="dock"><div>${has?`<button class="btn ghost" data-a="confirm" data-v="abandon">Abandonner</button><button class="btn main" data-a="continue">Continuer la run</button>`:`<button class="btn main" data-a="play">Jouer · ${'★'.repeat(ui.star)}</button>`}</div></div>
+  <div class="dock">${has&&ui.confirm==='abandon'?`<div class="confirm"><p>Abandonner la run en cours ? Tu perds les héros, l'équipement et les écus.</p><div class="row2"><button class="btn" data-a="confirm" data-v="">Annuler</button><button class="btn main danger" data-a="abandon">Abandonner</button></div></div>`:''}<div ${has&&ui.confirm==='abandon'?'hidden':''}>${has?`<button class="btn ghost" data-a="confirm" data-v="abandon">Abandonner</button><button class="btn main" data-a="continue">Continuer la run</button>`:`<button class="btn main" data-a="play">Jouer · ${'★'.repeat(ui.star)}</button>`}</div></div>
 </div>`}
 
 function vPick(){const sel=ui.pick;return`<div class="pick">
