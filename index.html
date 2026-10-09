@@ -531,6 +531,7 @@ body{background-color:var(--bg);background-image:
 
 
 .ccard .top br{display:none}.ccard b{font-size:19px;overflow-wrap:normal;padding-right:0}.ccard .top{align-items:flex-start}.ccard.on{padding:13px}
+.hcard .bline{background:none!important;box-shadow:none!important;border:0!important}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <canvas id="amb" aria-hidden="true"></canvas>
@@ -749,48 +750,82 @@ const RELIC=['Cœur','Œil','Croc','Couronne','Sceau','Larme'];
 
 /* ================= Talismans & quests ================= */
 const TALIS=[
-  {id:'mousse',n:'Talisman de Mousse',i:'🟢',b:'+8 % PV max',q:['first_run','win10','team3','boss1']},
-  {id:'braise',n:'Talisman de Braise',i:'🔴',b:'+6 % de dégâts',q:['hard5','boss5','hit100','flawless']},
-  {id:'rosee',n:'Talisman de Rosée',i:'🔵',b:'+25 prospection',q:['sell10','inv30','spend500','buy3']},
-  {id:'brise',n:'Talisman de Brise',i:'⚪',b:'+4 % de critique',q:['crit50','alpha3','portal3','sanct3']},
-  {id:'ambre',n:"Talisman d'Ambre",i:'🟠',b:'+1 PA',q:['bestiary1']},
-  {id:'pierre',n:'Talisman de Pierre',i:'🟤',b:'+5 % à toutes les résistances',q:['world1','w2z4','star3','set4']},
-  {id:'pelerin',n:'Talisman du Pèlerin',i:'🟣',b:'+1 potion par run',q:['potion10','tav10','revive5']},
-  {id:'or',n:"Talisman d'Or",i:'🟡',b:'+30 % d’écus',q:['forgeleg','gold2000','relic1']},
-  {id:'cauchemar',n:'Talisman du Cauchemar',i:'⚫',b:'+10 % de dégâts et de PV',q:['star5','world3','alpha20']},
+  {id:'mousse',n:'Talisman de Mousse',b:'+8 % de PV max.',q:['first_run','win10','team3','boss1']},
+  {id:'lierre',n:'Talisman de Lierre',b:"À la fin de son tour, chaque héros reçoit un bouclier de 3 % de ses PV max par ennemi en ligne avant.",q:['kills100','kills500','big5','hard5']},
+  {id:'lune',n:'Talisman de Lune',b:'Une fois par combat, un héros sous 20 % de ses PV récupère 20 % de ses PV max au début de son tour.',q:['lowWin','potion10','revive5']},
+  {id:'braise',n:'Talisman de Braise',b:'+5 % de dégâts finaux.',q:['hit100','hit300','boss5','boss15']},
+  {id:'brise',n:'Talisman de Brise',b:'+10 % de chance de coup critique.',q:['crit50','crit250','crit1000']},
+  {id:'pierre',n:'Talisman de Pierre',b:'+5 % de résistance dans chaque élément.',q:['taken1000','taken10000','set4','flawless']},
+  {id:'grenat',n:'Talisman de Grenat',b:'+8 % en Force, Intelligence, Chance et Agilité.',q:['world1','world2','world3','lvl100']},
+  {id:'givre',n:'Talisman de Givre',b:'Tes coups ignorent 8 points de résistance ennemie.',q:['el_t','el_f','el_e','el_a']},
+  {id:'perle',n:'Talisman de Perle',b:'À la fin de son tour, chaque héros soigne les alliés de sa rangée de 3 % de leurs PV max.',q:['heal500','heal3000','heal10000']},
+  {id:'agate',n:"Talisman d'Agate",b:"Quand un héros inflige des dégâts, ses alliés gagnent +5 % de dégâts jusqu'à la fin de leur prochain tour. Non cumulable.",q:['team4','recruit5','win4']},
+  {id:'onyx',n:"Talisman d'Onyx",b:'Quand un héros abat un ennemi, il reçoit un bouclier de 20 % de ses PV max.',q:['alpha3','alpha20','kills1000']},
+  {id:'corail',n:'Talisman de Corail',b:'Un tour sur deux, chaque héros récupère 8 % de ses PV max au début de son tour.',q:['win25','win100','w2z4']},
+  {id:'rosee',n:'Talisman de Rosée',b:'+5 prospection par rang de rareté du meilleur objet jamais trouvé (jusqu’à +30).',q:['sell10','inv30','spend500','buy3','rare4']},
+  {id:'or',n:"Talisman d'Or",b:'+30 % d’écus.',q:['forgeleg','gold2000','relic1']},
+  {id:'pelerin',n:'Talisman du Pèlerin',b:'+1 potion par run.',q:['portal3','sanct3','tav10']},
+  {id:'ambre',n:"Talisman d'Ambre",b:'+1 PA à toute l’équipe.',q:['best_0','best_1','best_2','best_3','best_4']},
+  {id:'cauchemar',n:'Talisman du Cauchemar',b:'Le premier héros de la formation joue toujours en premier.',q:['star5_0','star5_1','star5_2','star5_3','star5_4']},
 ];
+const QN=(n,s)=>n.toLocaleString('fr-FR')+' '+s;
 const QUESTS={
   first_run:['Terminer une run (victoire ou défaite)',m=>m.cnt.runsEnded>=1],
   win10:['Gagner 10 combats',m=>m.cnt.wins>=10],
+  win25:['Gagner 25 combats',m=>m.cnt.wins>=25],
+  win100:['Gagner 100 combats',m=>m.cnt.wins>=100],
   team3:['Avoir 3 héros dans l’équipe',m=>m.cnt.maxTeam>=3],
+  team4:['Avoir 4 héros dans l’équipe',m=>m.cnt.maxTeam>=4],
+  recruit5:['Recruter 5 héros en taverne',m=>(m.cnt.recruits||0)>=5],
+  win4:['Gagner un monde avec 4 héros',m=>(m.cnt.win4||0)>=1],
   boss1:['Vaincre un boss de donjon',m=>m.cnt.bossKills>=1],
-  hard5:['Gagner 5 combats durs',m=>m.cnt.hardWins>=5],
   boss5:['Vaincre 5 boss de donjon',m=>m.cnt.bossKills>=5],
+  boss15:['Vaincre 15 boss de donjon',m=>m.cnt.bossKills>=15],
+  kills100:['Vaincre 100 monstres',m=>m.cnt.kills>=100],
+  kills500:['Vaincre 500 monstres',m=>m.cnt.kills>=500],
+  kills1000:['Vaincre 1 000 monstres',m=>m.cnt.kills>=1000],
+  big5:['Gagner un combat contre 5 ennemis ou plus',m=>(m.cnt.big5||0)>=1],
+  hard5:['Gagner 5 combats durs',m=>m.cnt.hardWins>=5],
   hit100:['Infliger un coup de 100 dégâts ou plus',m=>m.cnt.maxHit>=100],
+  hit300:['Infliger un coup de 300 dégâts ou plus',m=>m.cnt.maxHit>=300],
   flawless:['Gagner un combat dur sans aucun K.O.',m=>m.cnt.flawless>=1],
+  lowWin:['Gagner un combat avec un héros sous 10 % de ses PV',m=>(m.cnt.lowWin||0)>=1],
+  potion10:['Boire 10 potions',m=>m.cnt.potions>=10],
+  revive5:['Relever 5 alliés',m=>m.cnt.revives>=5],
+  crit50:['Réussir 50 coups critiques',m=>m.cnt.crits>=50],
+  crit250:['Réussir 250 coups critiques',m=>m.cnt.crits>=250],
+  crit1000:['Réussir 1 000 coups critiques',m=>m.cnt.crits>=1000],
+  taken1000:['Encaisser 1 000 dégâts au total',m=>(m.cnt.taken||0)>=1000],
+  taken10000:['Encaisser 10 000 dégâts au total',m=>(m.cnt.taken||0)>=10000],
+  set4:['Porter une panoplie complète',m=>m.cnt.setDone>=1],
+  world1:['Gagner le Monde 1',m=>(m.worlds[0].wins||0)>=1],
+  world2:['Gagner le Monde 2',m=>(m.worlds[1].wins||0)>=1],
+  world3:['Gagner le Monde 3',m=>(m.worlds[2].wins||0)>=1],
+  lvl100:['Amener un héros au niveau 100',m=>(m.cnt.maxLvl||0)>=100],
+  el_t:['Vaincre 40 monstres de Terre',m=>((m.cnt.killsEl||{}).t||0)>=40],
+  el_f:['Vaincre 40 monstres de Feu',m=>((m.cnt.killsEl||{}).f||0)>=40],
+  el_e:['Vaincre 40 monstres d’Eau',m=>((m.cnt.killsEl||{}).e||0)>=40],
+  el_a:['Vaincre 40 monstres d’Air',m=>((m.cnt.killsEl||{}).a||0)>=40],
+  heal500:['Soigner 500 PV au total',m=>(m.cnt.healed||0)>=500],
+  heal3000:['Soigner 3 000 PV au total',m=>(m.cnt.healed||0)>=3000],
+  heal10000:['Soigner 10 000 PV au total',m=>(m.cnt.healed||0)>=10000],
+  alpha3:['Vaincre 3 monstres alpha',m=>m.cnt.alphaKills>=3],
+  alpha20:['Vaincre 20 monstres alpha différents',m=>Object.keys(m.alphas).length>=20],
+  w2z4:['Atteindre la zone 4 du Monde 2',m=>(m.worlds[1].zoneMax||0)>=4],
   sell10:['Vendre 10 objets',m=>m.cnt.sold>=10],
   inv30:['Avoir 30 objets dans l’inventaire',m=>m.cnt.maxInv>=30],
   spend500:['Dépenser 500 écus au total',m=>m.cnt.spent>=500],
   buy3:['Acheter 3 objets au comptoir',m=>m.cnt.bought>=3],
-  crit50:['Réussir 50 coups critiques',m=>m.cnt.crits>=50],
-  alpha3:['Vaincre 3 monstres alpha',m=>m.cnt.alphaKills>=3],
-  portal3:['Emprunter 3 portails',m=>m.cnt.portals>=3],
-  sanct3:['Prier dans 3 sanctuaires',m=>m.cnt.sanct>=3],
-  bestiary1:['Compléter le bestiaire alpha du Monde 1',m=>WORLDS[0].roster.every((_,i)=>m.alphas['0_'+i])],
-  world1:['Gagner le Monde 1',m=>(m.worlds[0].wins||0)>=1],
-  w2z4:['Atteindre la zone 4 du Monde 2',m=>(m.worlds[1].zoneMax||0)>=4],
-  star3:['Gagner une run en 3 étoiles',m=>m.cnt.bestStarWin>=3],
-  set4:['Porter une panoplie complète',m=>m.cnt.setDone>=1],
-  potion10:['Boire 10 potions',m=>m.cnt.potions>=10],
-  tav10:['Se soigner 10 fois en taverne',m=>m.cnt.tavHeals>=10],
-  revive5:['Relever 5 alliés en combat',m=>m.cnt.revives>=5],
+  rare4:['Trouver un objet mythique',m=>(m.cnt.bestR||0)>=4],
   forgeleg:['Forger un objet légendaire',m=>m.cnt.forgeLeg>=1],
   gold2000:['Posséder 2 000 écus en même temps',m=>m.cnt.maxGold>=2000],
   relic1:['Trouver une relique',m=>Object.keys(m.relics).length>=1],
-  star5:['Gagner une run en 5 étoiles',m=>m.cnt.bestStarWin>=5],
-  world3:['Gagner le Monde 3',m=>(m.worlds[2].wins||0)>=1],
-  alpha20:['Vaincre 20 monstres alpha différents',m=>Object.keys(m.alphas).length>=20],
+  portal3:['Emprunter 3 portails',m=>m.cnt.portals>=3],
+  sanct3:['Prier dans 3 sanctuaires',m=>m.cnt.sanct>=3],
+  tav10:['Se soigner 10 fois en taverne',m=>m.cnt.tavHeals>=10],
 };
+WORLDS.forEach((W,w)=>{QUESTS['best_'+w]=[`Compléter le bestiaire alpha du Monde ${w+1}`,m=>W.roster.every((_,i)=>m.alphas[w+'_'+i])];
+  QUESTS['star5_'+w]=[`Gagner le Monde ${w+1} en 5 étoiles`,m=>(m.worlds[w].bestStar||0)>=5]});
 /* ================= Art: hand-drawn SVG icon set, class medallions, world scenes, ambient particles ================= */
 const svg=(body,cls='',vb='0 0 24 24')=>`<svg class="ic ${cls}" viewBox="${vb}" aria-hidden="true" focusable="false">${body}</svg>`;
 const ELC={t:'#d2ad72',f:'#f28a5a',e:'#6db8ef',a:'#8ed88a'};
@@ -928,8 +963,9 @@ function later(fn,ms){clearTimeout(timer);timer=setTimeout(fn,ms)}
 function toast(msg){const box=document.getElementById('toasts');const d=document.createElement('div');d.className='toast';d.textContent=msg;box.appendChild(d);setTimeout(()=>d.remove(),3200)}
 
 /* ================= Talismans ================= */
-function talB(){const T={hp:0,dmg:0,pp:0,crit:0,pa:0,res:0,potion:0,gold:0};const o=meta.talis;
-  if(o.mousse)T.hp+=8;if(o.braise)T.dmg+=6;if(o.rosee)T.pp+=25;if(o.brise)T.crit+=4;if(o.ambre)T.pa+=1;if(o.pierre)T.res+=5;if(o.pelerin)T.potion+=1;if(o.or)T.gold+=30;if(o.cauchemar){T.dmg+=10;T.hp+=10}return T}
+function talB(){const T={hp:0,dmg:0,pp:0,crit:0,pa:0,res:0,potion:0,gold:0,stat:0,pierce:0};const o=meta.talis;
+  if(o.mousse)T.hp+=8;if(o.braise)T.dmg+=5;if(o.rosee)T.pp+=Math.min(30,5*((meta.cnt.bestR??0)+1));if(o.brise)T.crit+=10;if(o.ambre)T.pa+=1;if(o.pierre)T.res+=5;if(o.pelerin)T.potion+=1;if(o.or)T.gold+=30;if(o.grenat)T.stat+=8;if(o.givre)T.pierce+=8;return T}
+const hasT=k=>!!meta.talis[k];
 function checkQuests(){let changed=false;
   TALIS.forEach(t=>{t.q.forEach(q=>{if(!meta.quests[q]&&QUESTS[q][1](meta)){meta.quests[q]=1;changed=true;toast('Quête réussie : '+QUESTS[q][0])}});
     if(!meta.talis[t.id]&&t.q.every(q=>meta.quests[q])){meta.talis[t.id]=1;changed=true;toast(`${t.i} ${t.n} obtenu ! ${t.b}`)}});
@@ -945,7 +981,7 @@ function hstats(h){
   const it={t:0,f:0,e:0,a:0,vita:0,crit:0,pp:0,pui:0,soin:0,init:0,pa:0,res:{t:0,f:0,e:0,a:0}};const sets={};
   for(const x of Object.values(h.eq))if(x){for(const k in x.st){const v=x.st[k];if(k==='adapt')c.els.forEach(e=>it[e]+=v);else if(k[0]==='r'&&k.length===2)it.res[k[1]]+=v;else it[k]=(it[k]||0)+v}if(x.set&&x.set!=='relic')sets[x.set]=(sets[x.set]||0)+1}
   const setPA=Object.values(sets).some(n=>n>=4)?1:0;
-  const tot=k=>base[k]+it[k];const vita=base.vita+it.vita;
+  const tot=k=>k==='vita'?base[k]+it[k]:Math.round((base[k]+it[k])*(1+T.stat/100));const vita=base.vita+it.vita;
   return{base,it,t:tot('t'),f:tot('f'),e:tot('e'),a:tot('a'),vita,
     hp:Math.round((50+vita+tot('t')*.25)*(1+T.hp/100)),
     crit:Math.min(60,5+tot('a')/12+it.crit+T.crit),critD:30+tot('a')/6,esq:Math.min(25,tot('a')/20),
@@ -954,7 +990,7 @@ function hstats(h){
     pa:6+setPA+it.pa+T.pa,init:c.init+it.init+Math.floor(L/10),setPA}}
 const maxHp=u=>u.side==='h'?hstats(u).hp:u.hpMax;
 function heroCap(){return WORLDS[run.w].lv[1]}
-function giveXp(h,n,lines){if(h.lvl>=heroCap())return;h.xp+=Math.round(n);while(h.xp>=xpNeed(h.lvl)&&h.lvl<heroCap()){const before=maxHp(h);h.xp-=xpNeed(h.lvl);h.lvl++;if(h.alive)h.hp+=maxHp(h)-before;lines&&lines.push(`${h.name} passe niveau ${h.lvl}.`)}if(h.lvl>=heroCap())h.xp=0}
+function giveXp(h,n,lines){if(h.lvl>=heroCap())return;h.xp+=Math.round(n);while(h.xp>=xpNeed(h.lvl)&&h.lvl<heroCap()){const before=maxHp(h);h.xp-=xpNeed(h.lvl);h.lvl++;meta.cnt.maxLvl=Math.max(meta.cnt.maxLvl||0,h.lvl);if(h.alive)h.hp+=maxHp(h)-before;lines&&lines.push(`${h.name} passe niveau ${h.lvl}.`)}if(h.lvl>=heroCap())h.xp=0}
 function healPct(h,p){if(!h.alive)return;h.hp=Math.min(maxHp(h),h.hp+Math.round(maxHp(h)*p))}
 function checkSets(){run.heroes.forEach(h=>{if(hstats(h).setPA)meta.cnt.setDone=Math.max(meta.cnt.setDone,1)})}
 
@@ -984,7 +1020,7 @@ function forgeItem(it){const rm0=RAR[it.r].m;it.r++;const f=RAR[it.r].m/rm0;for(
   const keys=Object.keys(it.st);if(keys.length<RAR[it.r].n){for(const k of shuffle(POOLS[it.slot])){if(k!=='res'&&it.st[k])continue;const [kk,v]=affix(k,it.L,RAR[it.r].m,keys);if(!it.st[kk]){it.st[kk]=v;break}}}
   if(it.w){it.w.a+=1;it.w.b+=1}if(it.r>=3)meta.cnt.forgeLeg++;noteArmory(it)}
 function addInv(it){run.inv.push(it);noteArmory(it);meta.cnt.maxInv=Math.max(meta.cnt.maxInv,run.inv.length)}
-function noteArmory(it){const k=it.name;meta.armory[k]=Math.max(meta.armory[k]??-1,it.r);if(it.relic)meta.relics[it.relic]=1}
+function noteArmory(it){meta.cnt.bestR=Math.max(meta.cnt.bestR??-1,it.r);const k=it.name;meta.armory[k]=Math.max(meta.armory[k]??-1,it.r);if(it.relic)meta.relics[it.relic]=1}
 function equip(h,it){const before=maxHp(h);const old=h.eq[it.slot];run.inv=run.inv.filter(x=>x.id!==it.id);h.eq[it.slot]=it;if(old)run.inv.push(old);const after=maxHp(h);if(h.alive)h.hp=clamp(h.hp+(after-before),1,after);checkSets();checkQuests()}
 function unequip(h,slot){const it=h.eq[slot];if(!it)return;const before=maxHp(h);h.eq[slot]=null;run.inv.push(it);const after=maxHp(h);if(h.alive)h.hp=clamp(h.hp+(after-before),1,after)}
 function findItem(id){let it=run.inv.find(x=>x.id===id);if(it)return{it,where:'inv'};for(const h of run.heroes)for(const s in h.eq)if(h.eq[s]&&h.eq[s].id===id)return{it:h.eq[s],where:h};return null}
@@ -1037,7 +1073,7 @@ function fx(u,txt,cls){fxq.push({id:u.id,txt,cls})}
 const sab=u=>{u.st.sab=Math.min(5,(u.st.sab||0)+1)};
 const rage=u=>{u.st.rage=Math.min(5,(u.st.rage||0)+1);fx(u,'Rage '+u.st.rage,'buff')};
 function shield(t,v){if(!t.alive)return;v=Math.round(v);t.st.shield=(t.st.shield||0)+v;fx(t,'+'+v+' 🛡','shield')}
-function heal(src,t,a,b,o={}){if(!t||!t.alive)return;let v=R(Math.round(a),Math.round(b));if(src.side==='h'&&!o.raw)v=Math.round(v*sc(src)*(1+hstats(src).soin/100));const real=Math.min(v,maxHp(t)-t.hp);t.hp+=real;fx(t,'+'+v,'heal');log(`${t.name} récupère <b class="h">${v}</b> PV.`)}
+function heal(src,t,a,b,o={}){if(!t||!t.alive)return;let v=R(Math.round(a),Math.round(b));if(src.side==='h'&&!o.raw)v=Math.round(v*sc(src)*(1+hstats(src).soin/100));const real=Math.min(v,maxHp(t)-t.hp);t.hp+=real;if(t.side==='h')meta.cnt.healed=(meta.cnt.healed||0)+real;fx(t,'+'+v,'heal');log(`${t.name} récupère <b class="h">${v}</b> PV.`)}
 function poison(src,t,v,turns){v=Math.round(src.side==='h'?v*(1+hstats(src).pui/100):v);const p=t.st.poison||{v:0,t:0};t.st.poison={v:p.v+v,t:Math.max(p.t,turns)};fx(t,'☠ '+v,'debuff');log(`${t.name} est empoisonné (${t.st.poison.v}/tour).`)}
 function resOf(t,e){return (t.side==='h'?hstats(t).res[e]:t.res[e])+bsum(t,'res')}
 function esq(t){if(t.side!=='h')return 0;return hstats(t).esq+(t.st.smoke?20:0)+bsum(t,'esq')}
@@ -1086,7 +1122,7 @@ function dmgMult(src,t,el,o={},S){
   if(src.st.ambush&&!o.noCrit)m*=1.5;
   if(o.mult)m*=o.mult;
   if(src.st.weak)m*=.75;
-  let res=t?resOf(t,el):0;if(o.pierce&&res>0)res/=2;
+  let res=t?resOf(t,el):0;if(o.pierce&&res>0)res/=2;if(S&&t&&hasT('givre'))res-=8;
   return m*(1-clamp(res,-50,60)/100)}
 function hit(src,t,a,b,o={}){
   if(!t||!t.alive)return null;
@@ -1106,17 +1142,18 @@ function hit(src,t,a,b,o={}){
     if(t.row==='back'){const v=heroesAlive().find(x=>x!==t&&bsum(x,'valkyr'));if(v){const s2=Math.round(d/2);d-=s2;const ab=Math.min(v.st.shield||0,s2);if(ab)v.st.shield-=ab;v.hp=Math.max(0,v.hp-(s2-ab));fx(v,'-'+s2,'dmg');log(`${v.name} encaisse ${s2} à la place de ${t.name}.`);if(v.hp<=0)ko(v)}}}
   const abs=Math.min(t.st.shield||0,d);if(abs)t.st.shield-=abs;
   const real=d-abs;t.hp=Math.max(0,t.hp-real);
-  if(t.side==='h')t.st.taken=(t.st.taken||0)+real;
+  if(t.side==='h'){t.st.taken=(t.st.taken||0)+real;meta.cnt.taken=(meta.cnt.taken||0)+real}
+  if(S&&real>0&&hasT('agate'))heroesAlive().forEach(a=>{if(a!==src)a.st.b=Object.assign(a.st.b||{},{agate:{c:'dmg',v:5,t:Math.max(1,(a.st.b&&a.st.b.agate&&a.st.b.agate.t)||0,C()&&C().cur===a.id?2:1)}})});
   if(S){if(crit)meta.cnt.crits++;if(d>meta.cnt.maxHit)meta.cnt.maxHit=d;
     if(real>0&&src.alive&&run.heroes.some(h=>h.alive&&h.st.flair===t.id)){const v=Math.round(real*.15);if(v){src.hp=Math.min(maxHp(src),src.hp+v);fx(src,'+'+v,'heal')}}}
   fx(t,real?'-'+d:'🛡 '+abs,crit?'crit':real?'dmg':'shield');
   log(`${src.name} → ${t.name} : <b class="${crit?'c':'d'}">${d}</b> ${elIco(el)}${crit?' critique':''}${abs?` (${abs} absorbés)`:''}`);
-  if(t.hp<=0)ko(t);
+  if(t.hp<=0){ko(t);if(S&&t.side==='e'&&src.alive&&hasT('onyx'))shield(src,maxHp(src)*.2)}
   if(t.alive&&t.st.thorns&&src!==t&&src.alive){const th=t.st.thorns;src.hp=Math.max(0,src.hp-th);fx(src,'-'+th,'dmg');log(`${t.name} renvoie ${th} dégâts.`);if(src.hp<=0)ko(src)}
   return{d,crit,real,el}}
 function ko(u){u.alive=false;u.hp=0;const keep=u.side==='e'?{}:{};u.st=keep;log(`<b class="d">${u.name} est K.O.</b>`);
   if(u.side==='h'){const c=C();if(c)c.anyKO=true;run.heroes.forEach(h=>{if(h.st.guardBy===u.id)delete h.st.guardBy})}
-  else{meta.cnt.kills++;if(u.alpha&&u.key){if(!meta.alphas[u.key])toast(`Alpha vaincu : ${u.name} ajouté au bestiaire`);meta.alphas[u.key]=1;meta.cnt.alphaKills++}}}
+  else{meta.cnt.kills++;meta.cnt.killsEl=meta.cnt.killsEl||{};meta.cnt.killsEl[u.el]=(meta.cnt.killsEl[u.el]||0)+1;if(u.alpha&&u.key){if(!meta.alphas[u.key])toast(`Alpha vaincu : ${u.name} ajouté au bestiaire`);meta.alphas[u.key]=1;meta.cnt.alphaKills++}}}
 
 /* ================= Enemies ================= */
 function hashRes(name){let h=7;for(const ch of name)h=(h*31+ch.charCodeAt(0))|0;return h>>>0}
@@ -1151,7 +1188,10 @@ function startCombat(kind,mod){
   log(`<span class="rd">— ${kind==='boss'?'Donjon':kind==='hard'?'Combat dur':'Combat'} · niveau ${L} —</span>`);
   saveRun();nextTurn()}
 const stat=(u,k)=>u.side==='h'?hstats(u)[k]:u[k];
-function buildOrder(){const c=C();c.round++;c.order=allUnits().filter(u=>u.alive).sort((a,b)=>stat(b,'init')-stat(a,'init')||(a.side==='h'?-1:1)).map(u=>u.id);c.idx=0;log(`<span class="rd">Tour ${c.round}</span>`)}
+function heroEndTurn(h){const c=C();if(hasT('lierre')){const n=c.enemies.filter(e=>e.alive&&e.row==='front').length;if(n)shield(h,maxHp(h)*.03*n)}
+  if(hasT('perle'))heroesAlive().filter(a=>a.row===h.row).forEach(a=>{const v=Math.round(maxHp(a)*.03);if(a.hp<maxHp(a))heal(h,a,v,v,{raw:1})})}
+const leadHero=()=>heroesAlive().slice().sort((a,b)=>(a.row===b.row?0:a.row==='front'?-1:1)||(a.slot||0)-(b.slot||0))[0];
+function buildOrder(){const c=C();c.round++;c.order=allUnits().filter(u=>u.alive).sort((a,b)=>stat(b,'init')-stat(a,'init')||(a.side==='h'?-1:1)).map(u=>u.id);if(hasT('cauchemar')){const L=leadHero();if(L){c.order=c.order.filter(x=>x!==L.id);c.order.unshift(L.id)}}c.idx=0;log(`<span class="rd">Tour ${c.round}</span>`)}
 function startTurn(u){
   if(u.st.poison){const p=u.st.poison;u.hp=Math.max(0,u.hp-p.v);fx(u,'☠ -'+p.v,'debuff');log(`${u.name} subit ${p.v} de poison.`);p.t--;if(p.t<=0)delete u.st.poison;if(u.hp<=0){ko(u);return}}
   if(u.regen&&u.hp<u.hpMax){const v=Math.round(u.hpMax*.06);u.hp=Math.min(u.hpMax,u.hp+v);fx(u,'+'+v,'heal')}
@@ -1164,6 +1204,8 @@ function startTurn(u){
   if(u.side==='h')run.heroes.forEach(h=>{if(h.st.guardBy===u.id)delete h.st.guardBy});
   if(u.cd)for(const k in u.cd){u.cd[k]--;if(u.cd[k]<=0)delete u.cd[k]}
   u.used={};u.ptt={};u.turns=(u.turns||0)+1;
+  if(u.side==='h'&&u.alive){if(hasT('lune')&&!u.st.luneUsed&&u.hp<maxHp(u)*.2){u.st.luneUsed=1;const v=Math.round(maxHp(u)*.2);heal(u,u,v,v,{raw:1});log(`Le talisman de Lune veille sur ${u.name}.`)}
+    if(hasT('corail')&&(u.turns||0)%2===1){const v=Math.round(maxHp(u)*.08);heal(u,u,v,v,{raw:1})}}
   const xPA=(u.st.cadran?2:0)+(u.st.premo?3:0);if(u.st.cadran&&--u.st.cadran<=0)delete u.st.cadran;delete u.st.premo;
   if(u.side==='h')u.pa=Math.max(1,hstats(u).pa+(u.st.bonusPA||0)+xPA-(u.st.paLoss||0));
   else u.turnMul=1-.15*Math.min(4,u.st.paLoss||0);
@@ -1171,7 +1213,7 @@ function startTurn(u){
 function nextTurn(){
   clearTimeout(timer);const c=C();if(!c||c.over)return;
   if(checkEnd())return;
-  const pv=c.cur&&unit(c.cur);c.cur=null;if(pv&&pv.alive)tickB(pv);
+  const pv=c.cur&&unit(c.cur);c.cur=null;if(pv&&pv.alive){tickB(pv);if(pv.side==='h')heroEndTurn(pv)}
   c.idx++;if(c.idx>=c.order.length)buildOrder();
   const u=unit(c.order[c.idx]);
   if(!u||!u.alive)return nextTurn();
@@ -1250,7 +1292,7 @@ function rangeTxt(r){if(!r)return'';return r.lo2!=null?`${r.lo2}–${r.hi2} ou $
 function victory(){
   const c=C();if(!c)return;busy=false;const kind=c.kind,L=c.L,T=talB();const lines=[];
   const pps=run.heroes.map(h=>hstats(h).pp);const ppF=pps.reduce((s,v)=>s+v,0)/pps.length/100;
-  meta.cnt.wins++;if(kind==='hard'){meta.cnt.hardWins++;if(!c.anyKO)meta.cnt.flawless++}
+  meta.cnt.wins++;if(c.enemies.length>=5)meta.cnt.big5=(meta.cnt.big5||0)+1;if(run.heroes.some(h=>h.alive&&h.hp<maxHp(h)*.1))meta.cnt.lowWin=(meta.cnt.lowWin||0)+1;if(kind==='hard'){meta.cnt.hardWins++;if(!c.anyKO)meta.cnt.flawless++}
   const gold=Math.round(R(6,10)*(1+L/8)*ppF*(kind==='hard'?1.5:1)*(kind==='boss'?3:1)*(1+T.gold/100));run.gold+=gold;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);
   const xpF=(kind==='hard'?1.4:1)*(kind==='boss'?2.5:1);
   lines.push(`+${fmt(gold)} écus ${ico('coin')}`);
@@ -1273,7 +1315,7 @@ function afterLoot(){const k=run.loot.kind;run.loot=null;
     const Z=WORLDS[run.w].zones[run.z];run.msg={icon:Z[1],title:Z[0],text:`Zone ${run.z+1} sur ${ZONES}. Niveau des monstres : ${zoneLevel(0)}–${zoneLevel(7)}. Le donjon t'attend au bout de la carte.`};run.phase='msg'}
   else run.phase='map';
   saveRun();render()}
-function winRun(){const W=meta.worlds[run.w];W.wins++;W.starMax=Math.max(W.starMax,Math.min(5,run.star+1));meta.cnt.bestStarWin=Math.max(meta.cnt.bestStarWin,run.star);meta.cnt.runsEnded++;
+function winRun(){const W=meta.worlds[run.w];W.wins++;W.bestStar=Math.max(W.bestStar||0,run.star);if(run.heroes.length>=4)meta.cnt.win4=(meta.cnt.win4||0)+1;W.starMax=Math.max(W.starMax,Math.min(5,run.star+1));meta.cnt.bestStarWin=Math.max(meta.cnt.bestStarWin,run.star);meta.cnt.runsEnded++;
   if(run.w+1<WORLDS.length&&meta.unlocked<run.w+2){meta.unlocked=run.w+2;toast('Nouveau monde débloqué : '+WORLDS[run.w+1].n)}
   run.phase='end';run.result='win';checkQuests();saveMeta();saveRun();render()}
 /* ================= Rendering ================= */
@@ -1426,7 +1468,7 @@ function vEnd(){const win=run.result==='win';return`<div class="endscr"><div cla
   <p class="mute">Talismans, bestiaire, reliques et succès sont conservés.</p>
   <button class="btn main" data-a="endok">Retour à l'accueil</button></div>`}
 function sortedInv(){const l=run.inv.slice();const so=Object.keys(SLOTS);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
-const TALC={mousse:'#5fcf86',braise:'#f2704a',rosee:'#6db8ef',brise:'#dbe8ff',ambre:'#f2a13a',pierre:'#b08a5a',pelerin:'#b583f2',or:'#f4cd4f',cauchemar:'#c23a5e'};
+const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e'};
 /* ================= Sheets ================= */
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
@@ -1446,8 +1488,8 @@ function shRules(){return sheet('Règles',`<div class="rules">
  <h4>Monstres alpha</h4><p>N'importe quel monstre peut apparaître en version alpha, plus forte. La vaincre l'ajoute au bestiaire. Le bestiaire complet du Monde 1 donne le Talisman d'Ambre.</p>
  <h4>Étoiles</h4><p>Les étoiles d'un monde règlent sa difficulté, d'une (normal) à cinq. Gagner une run débloque l'étoile suivante, et gagner un monde ouvre le monde suivant.</p></div>`)}
 function shTalis(){const n=Object.keys(meta.talis).length;return sheet('Talismans',`<p class="mute" style="margin:0">${n} / ${TALIS.length} talismans. Ils survivent à la mort et s'appliquent à chaque run.</p>
-  <div class="tgrid">${TALIS.map(t=>`<button class="tal ${meta.talis[t.id]?'':'off'}" style="--tc:${TALC[t.id]}" data-a="questT" data-v="${t.id}"><span class="egg"></span><b>${t.n.replace('Talisman ','')}</b><small class="mute">${t.b}</small></button>`).join('')}</div><p class="mute" style="margin:0;font-size:13px">Touche un talisman pour voir les quêtes qui le débloquent.</p>`)}
-function shQuests(){const done=Object.keys(meta.quests).length,tot=Object.keys(QUESTS).length;return sheet('Succès',`<p class="mute" style="margin:0">${done} / ${tot} quêtes · ${Object.keys(meta.talis).length} / ${TALIS.length} talismans</p>
+  <div class="tgrid">${TALIS.map(t=>`<button class="tal ${meta.talis[t.id]?'':'off'}" style="--tc:${TALC[t.id]}" data-a="questT" data-v="${t.id}"><span class="egg"></span><b>${t.n.replace(/^Talisman (de |d'|du )/,'').replace(/^./,c=>c.toUpperCase())}</b><small class="mute">${t.b}</small></button>`).join('')}</div><p class="mute" style="margin:0;font-size:13px">Touche un talisman pour voir les quêtes qui le débloquent.</p>`)}
+function shQuests(){const done=Object.keys(meta.quests).filter(q=>QUESTS[q]).length,tot=Object.keys(QUESTS).length;return sheet('Succès',`<p class="mute" style="margin:0">${done} / ${tot} quêtes · ${Object.keys(meta.talis).length} / ${TALIS.length} talismans</p>
   ${TALIS.map(t=>{const d=t.q.filter(q=>meta.quests[q]).length,open=ui.questT===t.id;return`<div class="hcard"><button class="bline" style="border:0;background:none;padding:0" data-a="questT" data-v="${t.id}"><span class="tal ${meta.talis[t.id]?'':'off'}" style="--tc:${TALC[t.id]};padding:0;border:0;background:none"><span class="egg" style="width:30px;height:37px"></span></span><div class="meta"><b>${t.n}</b><small>${t.b}${meta.talis[t.id]?' · obtenu':''}</small><div class="prog"><i style="width:${d/t.q.length*100}%"></i></div></div><span class="num mute">${d}/${t.q.length}</span></button>
    ${open?t.q.map(q=>`<div class="qline ${meta.quests[q]?'done':''}"><span class="ck">${meta.quests[q]?'✓':''}</span>${QUESTS[q][0]}</div>`).join(''):''}</div>`}).join('')}`)}
 function shBest(){const w=ui.bestW,W=WORLDS[w];const caught=W.roster.filter((_,k)=>meta.alphas[w+'_'+k]).length;
@@ -1534,7 +1576,7 @@ const A={
   msgok:()=>{run.msg=null;run.phase='map';saveRun();render()},
   leave:()=>{run.tav=null;run.shop=null;run.phase='map';ui.modal=null;saveRun();render()},
   tavheal:()=>{run.heroes.forEach(h=>{if(!h.alive){h.alive=true;h.hp=0}h.hp=Math.min(maxHp(h),h.hp+Math.round(maxHp(h)*.5));h.st={}});meta.cnt.tavHeals++;run.tav.done="L'équipe mange, boit et dort. Chacun récupère la moitié de ses PV max.";checkQuests();saveRun();render()},
-  recruit:c=>{if(run.heroes.length>=4)return;const lv=Math.max(...run.heroes.map(h=>h.lvl));const h=newHero(c,Math.max(WORLDS[run.w].lv[0],lv-1));normSlots();const used=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);let s=0;while(used.includes(s))s++;if(s>3){h.row=h.row==='front'?'back':'front';const u2=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);s=0;while(u2.includes(s))s++}h.slot=s;run.heroes.push(h);
+  recruit:c=>{if(run.heroes.length>=4)return;meta.cnt.recruits=(meta.cnt.recruits||0)+1;const lv=Math.max(...run.heroes.map(h=>h.lvl));const h=newHero(c,Math.max(WORLDS[run.w].lv[0],lv-1));normSlots();const used=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);let s=0;while(used.includes(s))s++;if(s>3){h.row=h.row==='front'?'back':'front';const u2=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);s=0;while(u2.includes(s))s++}h.slot=s;run.heroes.push(h);
     starterKit(h,h.lvl,run.w);
     meta.cnt.maxTeam=Math.max(meta.cnt.maxTeam,run.heroes.length);run.tav.done=`${CLASSES[c].n} rejoint l'équipe au niveau ${h.lvl}, ${run.w?'avec une panoplie de départ':'sans équipement'}. Place-le dans la Formation si besoin.`;checkQuests();saveMeta();saveRun();render()},
   sellgreen:()=>{if(run.phase!=='shop')return;const g=run.inv.filter(x=>x.r===0);const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>x.r!==0);meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objets vendus : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()},
