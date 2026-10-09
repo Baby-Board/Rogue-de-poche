@@ -761,6 +761,7 @@ const TALIS=[
   {id:'perle',n:'Talisman de Perle',b:'À la fin de son tour, chaque héros soigne les alliés de sa rangée de 3 % de leurs PV max.',q:['heal500','heal3000','heal10000']},
   {id:'agate',n:"Talisman d'Agate",b:"Quand un héros inflige des dégâts, ses alliés gagnent +5 % de dégâts jusqu'à la fin de leur prochain tour. Non cumulable.",q:['team4','recruit5','win4']},
   {id:'onyx',n:"Talisman d'Onyx",b:'Quand un héros abat un ennemi, il reçoit un bouclier de 20 % de ses PV max.',q:['alpha3','alpha20','kills1000']},
+  {id:'quartz',n:'Talisman de Quartz',b:"Si un héros n'inflige aucun dégât pendant son premier tour, il gagne +5 % de dégâts finaux pour le reste du combat.",q:['support50','support300','support1000']},
   {id:'corail',n:'Talisman de Corail',b:'Un tour sur deux, chaque héros récupère 8 % de ses PV max au début de son tour.',q:['win25','win100','w2z4']},
   {id:'rosee',n:'Talisman de Rosée',b:'+5 prospection par rang de rareté du meilleur objet jamais trouvé (jusqu’à +30).',q:['sell10','inv30','spend500','buy3','rare4']},
   {id:'or',n:"Talisman d'Or",b:'+30 % d’écus.',q:['forgeleg','gold2000','relic1']},
@@ -823,6 +824,9 @@ const QUESTS={
   portal3:['Emprunter 3 portails',m=>m.cnt.portals>=3],
   sanct3:['Prier dans 3 sanctuaires',m=>m.cnt.sanct>=3],
   tav10:['Se soigner 10 fois en taverne',m=>m.cnt.tavHeals>=10],
+  support50:['Lancer 50 sorts de soutien (sans dégâts)',m=>(m.cnt.support||0)>=50],
+  support300:['Lancer 300 sorts de soutien',m=>(m.cnt.support||0)>=300],
+  support1000:['Lancer 1 000 sorts de soutien',m=>(m.cnt.support||0)>=1000],
 };
 WORLDS.forEach((W,w)=>{QUESTS['best_'+w]=[`Compléter le bestiaire alpha du Monde ${w+1}`,m=>W.roster.every((_,i)=>m.alphas[w+'_'+i])];
   QUESTS['star5_'+w]=[`Gagner le Monde ${w+1} en 5 étoiles`,m=>(m.worlds[w].bestStar||0)>=5]});
@@ -1143,6 +1147,7 @@ function hit(src,t,a,b,o={}){
   const abs=Math.min(t.st.shield||0,d);if(abs)t.st.shield-=abs;
   const real=d-abs;t.hp=Math.max(0,t.hp-real);
   if(t.side==='h'){t.st.taken=(t.st.taken||0)+real;meta.cnt.taken=(meta.cnt.taken||0)+real}
+  if(S&&real>0&&(src.turns||0)<=1)src.st.dealtT1=1;
   if(S&&real>0&&hasT('agate'))heroesAlive().forEach(a=>{if(a!==src)a.st.b=Object.assign(a.st.b||{},{agate:{c:'dmg',v:5,t:Math.max(1,(a.st.b&&a.st.b.agate&&a.st.b.agate.t)||0,C()&&C().cur===a.id?2:1)}})});
   if(S){if(crit)meta.cnt.crits++;if(d>meta.cnt.maxHit)meta.cnt.maxHit=d;
     if(real>0&&src.alive&&run.heroes.some(h=>h.alive&&h.st.flair===t.id)){const v=Math.round(real*.15);if(v){src.hp=Math.min(maxHp(src),src.hp+v);fx(src,'+'+v,'heal')}}}
@@ -1188,7 +1193,7 @@ function startCombat(kind,mod){
   log(`<span class="rd">— ${kind==='boss'?'Donjon':kind==='hard'?'Combat dur':'Combat'} · niveau ${L} —</span>`);
   saveRun();nextTurn()}
 const stat=(u,k)=>u.side==='h'?hstats(u)[k]:u[k];
-function heroEndTurn(h){const c=C();if(hasT('lierre')){const n=c.enemies.filter(e=>e.alive&&e.row==='front').length;if(n)shield(h,maxHp(h)*.03*n)}
+function heroEndTurn(h){const c=C();if(hasT('quartz')&&(h.turns||0)===1&&!h.st.dealtT1){addB(h,'quartz','dmg',5,9999);log(`${h.name} a pris le temps de viser : +5 % de dégâts pour le combat.`)}if(hasT('lierre')){const n=c.enemies.filter(e=>e.alive&&e.row==='front').length;if(n)shield(h,maxHp(h)*.03*n)}
   if(hasT('perle'))heroesAlive().filter(a=>a.row===h.row).forEach(a=>{const v=Math.round(maxHp(a)*.03);if(a.hp<maxHp(a))heal(h,a,v,v,{raw:1})})}
 const leadHero=()=>heroesAlive().slice().sort((a,b)=>(a.row===b.row?0:a.row==='front'?-1:1)||(a.slot||0)-(b.slot||0))[0];
 function buildOrder(){const c=C();c.round++;c.order=allUnits().filter(u=>u.alive).sort((a,b)=>stat(b,'init')-stat(a,'init')||(a.side==='h'?-1:1)).map(u=>u.id);if(hasT('cauchemar')){const L=leadHero();if(L){c.order=c.order.filter(x=>x!==L.id);c.order.unshift(L.id)}}c.idx=0;log(`<span class="rd">Tour ${c.round}</span>`)}
@@ -1272,6 +1277,7 @@ const anyCastable=h=>h.alive&&spellIds(h).some(s=>!blockReason(h,s));
 function cast(h,id,t){
   const sp=spellOf(h,id);if(blockReason(h,id))return;const vt=validTargets(h,id);if(vt&&!vt.includes(t))return;
   h._paBefore=h.pa;h.pa-=costOf(h,id);if(sp.pt)h.used[id]=(h.used[id]||0)+1;if(sp.tcd&&t){h.tcd=h.tcd||{};h.tcd[id+'|'+t.id]=sp.tcd+1}if(sp.pc)h.pc[id]=1;if(sp.cd)h.cd[id]=sp.cd+1;if(sp.ptt&&t)h.ptt[id+'|'+t.id]=1;
+  if(!sp.base&&!sp.wpn)meta.cnt.support=(meta.cnt.support||0)+1;
   log(`<i>${h.name}</i> lance ${sp.n}.`);
   sp.fn(h,t);ui.sel=null;render();saveRun();
   if(checkEnd())return;
@@ -1468,7 +1474,7 @@ function vEnd(){const win=run.result==='win';return`<div class="endscr"><div cla
   <p class="mute">Talismans, bestiaire, reliques et succès sont conservés.</p>
   <button class="btn main" data-a="endok">Retour à l'accueil</button></div>`}
 function sortedInv(){const l=run.inv.slice();const so=Object.keys(SLOTS);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
-const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e'};
+const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',quartz:'#e8e2f4',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e'};
 /* ================= Sheets ================= */
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
