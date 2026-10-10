@@ -34,7 +34,7 @@ const ORDER=Object.keys(CLASSES);
 /* Spell targets: front (ligne avant ennemie), any, prey, ally, allyOther, allyKO ; instants: self, allAllies, all, row */
 const TGL={unit:'Allié ou ennemi',front:'Ennemi (ligne avant)',any:'Ennemi (toute rangée)',prey:'La Proie (toute rangée)',ally:'Allié',allyOther:'Autre allié',allyKO:'Allié K.O.',self:'Soi-même',allAllies:"Toute l'équipe",all:'Tous les ennemis',row:'Rangée avant ennemie'};
 const SP={
-  tourbillon:{n:'Tourbillon',pa:2,tg:'front',ptt:1,base:[8,12],pv:u=>({mult:1+.2*(u.st.tourb||0)}),txt:'Dégâts à la cible, moitié au reste de sa rangée. +20 % sur tout le coup à chaque relance dans le tour (1×/cible/tour).',fn:(u,t)=>{const k=u.st.tourb||0,m=1+.2*k;hit(u,t,8,12,{mult:m});rowOf(t).filter(x=>x!==t).forEach(x=>hit(u,x,4,6,{mult:m,noCrit:1}));u.st.tourb=k+1}},
+  tourbillon:{n:'Tourbillon',pa:2,tg:'front',base:[8,12],pv:u=>{const k=u.st.tourb||0;return{base:[8+6*k,12+6*k]}},txt:'Frappe la cible. Chaque Tourbillon lancé ajoute +6 aux dégâts de base du sort jusqu’à la fin du tour.',fn:(u,t)=>{const k=u.st.tourb||0;hit(u,t,8+6*k,12+6*k);u.st.tourb=k+1;fx(u,'Tourbillon +'+6*(k+1),'buff')}},
   entaille:{n:'Entaille',pa:3,tg:'front',base:[11,15],txt:"+1 Élan : +10 % de dégâts jusqu'à la fin du tour.",fn:(u,t)=>{hit(u,t,11,15);u.st.elan=(u.st.elan||0)+1}},
   colere:{n:'Colère',pa:4,tg:'front',cd:2,base:[20,26],pv:u=>({mult:1+.25*(u.st.colere||0)}),txt:'Gros coup. +25 % de dégâts pour chaque Colère déjà lancée pendant le combat.',fn:(u,t)=>{const k=u.st.colere||0;hit(u,t,20,26,{mult:1+.25*k});u.st.colere=k+1;if(k)fx(u,'Colère ×'+(k+1),'buff')}},
   cri:{n:'Cri de guerre',pa:1,tg:'self',pt:1,txt:'+30 % de dégâts ce tour. 1×/tour.',fn:u=>{u.st.cri=1;fx(u,'+30%','buff')}},
