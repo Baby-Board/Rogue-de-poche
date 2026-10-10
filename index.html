@@ -532,6 +532,12 @@ body{background-color:var(--bg);background-image:
 
 .ccard .top br{display:none}.ccard b{font-size:19px;overflow-wrap:normal;padding-right:0}.ccard .top{align-items:flex-start}.ccard.on{padding:13px}
 .hcard .bline{background:none!important;box-shadow:none!important;border:0!important}
+.relics{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:12px;border:1px solid #9a6b22;background:var(--orn),linear-gradient(180deg,#2a2414,#16140c)}
+.relics .rhead{display:flex;flex-direction:column}.relics .rhead b{font:800 20px/1 var(--f-display);color:var(--brass2)}.relics .rhead small{color:var(--ink2);font-size:12.5px;margin-top:2px}
+.relics .rsum{font-weight:800;color:var(--crit);font-size:14px}
+.rlist{display:flex;flex-direction:column;gap:4px}
+.rel{display:flex;align-items:center;gap:8px;font-size:13.5px}.rel i{width:22px;height:22px;flex:none;display:grid;place-items:center;border-radius:50%;font:800 12px/1 var(--f-display);font-style:normal;color:#2b1904;background:radial-gradient(circle at 35% 30%,#fff1c4,#d39a3c)}
+.rel em{margin-left:auto;font-style:normal;color:var(--heal);font-weight:800;white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <canvas id="amb" aria-hidden="true"></canvas>
@@ -747,6 +753,11 @@ const FORGE_MAX=4;
 const STL={adapt:'★ Adapt.',vita:'Vita',crit:'% Crit',pp:'PP',pui:'% Puiss.',soin:'% Soins',init:'Init.',rt:'% Terre',rf:'% Feu',re:'% Eau',ra:'% Air',pa:'PA'};
 const STC={adapt:'g',vita:'',crit:'d',pp:'',pui:'d',soin:'b',init:'',rt:'el-t',rf:'el-f',re:'el-e',ra:'el-a',pa:'g'};
 const RELIC=['Cœur','Œil','Croc','Couronne','Sceau','Larme'];
+/* Relics are a permanent collection: one per zone boss, each a small team-wide bonus that applies to every run. */
+const RELFX=[['hp',1.5,'% PV max'],['crit',1,'% de critique'],['dmg',1,'% de dégâts'],['res',1,'% de résistances'],['pp',4,' prospection'],['soin',3,'% de soins']];
+const relicVal=(w,z)=>Math.round(RELFX[z][1]*(1+.5*w)*10)/10;
+const relicName=(w,z)=>RELIC[z]+' '+de(WORLDS[w].zones[z][2][0]);
+const relicTxt=(w,z)=>'+'+String(relicVal(w,z)).replace('.',',')+RELFX[z][2];
 
 /* ================= Talismans & quests ================= */
 const TALIS=[
@@ -958,6 +969,8 @@ function freshMeta(){return{unlocked:1,worlds:WORLDS.map(()=>({starMax:1,zoneMax
 let meta=store.get(META_KEY,null)||freshMeta();
 meta.cnt=Object.assign({...CNT0},meta.cnt);
 let run=store.get(RUN_KEY,null);
+/* migrate: relics used to be equippable items */
+if(run){const isR=x=>x&&(x.relic||x.set==='relic');(run.inv||[]).filter(isR).forEach(x=>{if(x.relic)meta.relics[x.relic]=1});run.inv=(run.inv||[]).filter(x=>!isR(x));(run.heroes||[]).forEach(h=>{for(const s in h.eq)if(isR(h.eq[s])){meta.relics[h.eq[s].relic]=1;h.eq[s]=null}});if(run.loot)run.loot.items=(run.loot.items||[]).filter(x=>!isR(x));store.set(RUN_KEY,run);store.set(META_KEY,meta)}
 let ui={screen:'home',world:0,star:1,sel:null,modal:null,confirm:null,pick:[],lastScreen:null,mapSel:null,invHero:0,itemId:null,inspect:null,encCls:'lame',bestW:0,bestZ:null,questT:null,form:null,shopTab:'buy',invSort:'tier'};
 ui.world=Math.min(meta.unlocked-1,store.get('rdp2_ui_w',0));ui.star=meta.worlds[ui.world].starMax;
 let busy=false,timer=null,fxq=[];
@@ -967,8 +980,9 @@ function later(fn,ms){clearTimeout(timer);timer=setTimeout(fn,ms)}
 function toast(msg){const box=document.getElementById('toasts');const d=document.createElement('div');d.className='toast';d.textContent=msg;box.appendChild(d);setTimeout(()=>d.remove(),3200)}
 
 /* ================= Talismans ================= */
+function relB(){const B={hp:0,crit:0,dmg:0,res:0,pp:0,soin:0};for(const k in meta.relics){const [w,z]=k.split('_').map(Number);if(WORLDS[w]&&RELFX[z])B[RELFX[z][0]]+=relicVal(w,z)}return B}
 function talB(){const T={hp:0,dmg:0,pp:0,crit:0,pa:0,res:0,potion:0,gold:0,stat:0,pierce:0};const o=meta.talis;
-  if(o.mousse)T.hp+=8;if(o.braise)T.dmg+=5;if(o.rosee)T.pp+=Math.min(30,5*((meta.cnt.bestR??0)+1));if(o.brise)T.crit+=10;if(o.ambre)T.pa+=1;if(o.pierre)T.res+=5;if(o.pelerin)T.potion+=1;if(o.or)T.gold+=30;if(o.grenat)T.stat+=8;if(o.givre)T.pierce+=8;return T}
+  if(o.mousse)T.hp+=8;if(o.braise)T.dmg+=5;if(o.rosee)T.pp+=Math.min(30,5*((meta.cnt.bestR??0)+1));if(o.brise)T.crit+=10;if(o.ambre)T.pa+=1;if(o.pierre)T.res+=5;if(o.pelerin)T.potion+=1;if(o.or)T.gold+=30;if(o.grenat)T.stat+=8;if(o.givre)T.pierce+=8;const B=relB();T.hp+=B.hp;T.crit+=B.crit;T.dmg+=B.dmg;T.res+=B.res;T.pp+=B.pp;T.soin=B.soin;return T}
 const hasT=k=>!!meta.talis[k];
 function checkQuests(){let changed=false;
   TALIS.forEach(t=>{t.q.forEach(q=>{if(!meta.quests[q]&&QUESTS[q][1](meta)){meta.quests[q]=1;changed=true;toast('Quête réussie : '+QUESTS[q][0])}});
@@ -989,7 +1003,7 @@ function hstats(h){
   return{base,it,t:tot('t'),f:tot('f'),e:tot('e'),a:tot('a'),vita,
     hp:Math.round((50+vita+tot('t')*.25)*(1+T.hp/100)),
     crit:Math.min(60,5+tot('a')/12+it.crit+T.crit),critD:30+tot('a')/6,esq:Math.min(25,tot('a')/20),
-    pp:Math.round(100+tot('e')/2+it.pp+T.pp),soin:tot('f')*.42+it.soin,pui:it.pui+T.dmg,
+    pp:Math.round(100+tot('e')/2+it.pp+T.pp),soin:tot('f')*.42+it.soin+(T.soin||0),pui:it.pui+T.dmg,
     res:{t:it.res.t+T.res,f:it.res.f+T.res,e:it.res.e+T.res,a:it.res.a+T.res},
     pa:6+setPA+it.pa+T.pa,init:c.init+it.init+Math.floor(L/10),setPA}}
 const maxHp=u=>u.side==='h'?hstats(u).hp:u.hpMax;
@@ -1308,7 +1322,7 @@ function victory(){
   let n=kind==='boss'?geo(4,.5):kind==='hard'?geo(3,.5):geo(1,.5);
   const w=DROPW[kind].slice();w[0]=w[0]/Math.max(.5,ppF);
   const items=[];for(let i=0;i<n;i++){const it=genItem({L,tier:tierOf(run.w,run.z),r:(kind==='hard'&&i===0)?Math.max(2,rollR(w)):rollR(w),set:Math.random()<.65?setOf(run.w,run.z):VAG});addInv(it);items.push(it)}
-  if(kind==='boss'&&Math.random()<.25*ppF){const rl=genRelic(run.w,run.z,L);addInv(rl);items.push(rl);lines.push('Une relique !')}
+  const rk=run.w+'_'+run.z;if(kind==='boss'&&!meta.relics[rk]&&Math.random()<.35*ppF){meta.relics[rk]=1;lines.push(`Relique trouvée : ${relicName(run.w,run.z)} (${relicTxt(run.w,run.z)} pour toute l’équipe, à chaque run)`);toast('Nouvelle relique : '+relicName(run.w,run.z))}
   if(kind==='boss'){meta.cnt.bossKills++;run.heroes.forEach(h=>{h.alive=true;h.hp=maxHp(h)});run.potions=Math.min(run.potMax,run.potions+1);lines.push("Toute l'équipe est remise sur pied.")}
   run.combat=null;run.loot={kind,lines,items};run.phase='loot';
   updateZoneMax();checkQuests();saveMeta();saveRun();render()}
@@ -1490,7 +1504,7 @@ function shRules(){return sheet('Règles',`<div class="rules">
  <h4>Le combat</h4><p>Chacun joue à son tour, dans l'ordre d'initiative affiché en haut. Chaque héros dépense ses PA en sorts ou en attaque d'arme. Chaque camp a une ligne avant et une ligne arrière : la plupart des attaques ne visent que la ligne avant ; quand elle est vide, la ligne arrière est exposée. Tu places tes héros dans l'écran Formation.</p><p>L'élément de frappe est choisi tout seul : à chaque coup, le héros frappe dans celui de ses deux éléments que la cible résiste le moins. Les résistances des monstres s'affichent sur leur carte.</p>
  <h4>Les caractéristiques</h4><ul><li><b>Force</b> ${elIco('t')} : donne aussi des PV.</li><li><b>Intelligence</b> ${elIco('f')} : augmente aussi tous les dégâts et les soins.</li><li><b>Agilité</b> ${elIco('a')} : chance et dégâts de coup critique, et esquive.</li><li><b>Chance</b> ${elIco('e')} : donne aussi de la prospection, qui fait tomber plus d'objets et d'écus.</li></ul><p>Les caractéristiques montent toutes seules avec le niveau.</p>
  <h4>Équipement et écus</h4><p>Chaque héros porte une arme, une coiffe, une cape et un anneau. Les objets tombent en combat, en six raretés : <span class="r0">commun</span>, <span class="r1">rare</span>, <span class="r2">épique</span>, <span class="r3">légendaire</span>, <span class="r4">mythique</span> et <span class="r5">divin</span> (extrêmement rare). Les quatre pièces d'une même panoplie donnent +1 PA. ★ Adapt. s'ajoute aux deux éléments du héros qui le porte. Les écus ${coin()} se gagnent en combat et en revendant des objets au comptoir ; ils servent au comptoir et à la forge.</p>
- <h4>Ce qui reste après la mort</h4><p>Les talismans : chacun donne un bonus permanent à toutes tes runs suivantes. On les obtient en terminant les groupes de quêtes du menu Succès. Restent aussi le bestiaire, les reliques et la progression des quêtes.</p>
+ <h4>Ce qui reste après la mort</h4><p>Les talismans : chacun donne un bonus permanent à toutes tes runs suivantes. On les obtient en terminant les groupes de quêtes du menu Succès. Les reliques : un boss peut en lâcher une par zone. Elles ne s'équipent pas : chacune donne un petit bonus à toute l'équipe, à chaque run. Restent aussi le bestiaire et la progression des quêtes.</p>
  <h4>Monstres alpha</h4><p>N'importe quel monstre peut apparaître en version alpha, plus forte. La vaincre l'ajoute au bestiaire. Le bestiaire complet du Monde 1 donne le Talisman d'Ambre.</p>
  <h4>Étoiles</h4><p>Les étoiles d'un monde règlent sa difficulté, d'une (normal) à cinq. Gagner une run débloque l'étoile suivante, et gagner un monde ouvre le monde suivant.</p></div>`)}
 function shTalis(){const n=Object.keys(meta.talis).length;return sheet('Talismans',`<p class="mute" style="margin:0">${n} / ${TALIS.length} talismans. Ils survivent à la mort et s'appliquent à chaque run.</p>
@@ -1523,9 +1537,13 @@ function shForm(){const inC=run.phase==='combat';const cell=(row,i)=>{const h=ru
   <span class="lab">Ligne avant</span><div class="fgrid">${[0,1,2,3].map(i=>cell('front',i)).join('')}</div>
   <span class="lab">Ligne arrière</span><div class="fgrid">${[0,1,2,3].map(i=>cell('back',i)).join('')}</div>`)}
 function normSlots(){['front','back'].forEach(r=>{const l=run.heroes.filter(h=>h.row===r).sort((a,b)=>(a.slot||0)-(b.slot||0));const used=new Set();l.forEach(h=>{if(h.slot==null||h.slot>3||used.has(h.slot)){let s=0;while(used.has(s))s++;h.slot=s}used.add(h.slot)})})}
+function relicPanel(){const own=Object.keys(meta.relics).filter(k=>{const [w,z]=k.split('_').map(Number);return WORLDS[w]&&RELFX[z]});const B=relB();
+  const sum=[['hp','% PV'],['crit','% crit'],['dmg','% dégâts'],['res','% rés.'],['pp',' prosp.'],['soin','% soins']].filter(([k])=>B[k]).map(([k,u])=>`+${String(Math.round(B[k]*10)/10).replace('.',',')}${u}`).join(' · ');
+  return`<div class="relics"><div class="rhead"><b>Reliques</b><small>${own.length} / ${WORLDS.length*ZONES} · actives pour toute l’équipe, à chaque run</small></div>${own.length?`<div class="rsum">${sum}</div><div class="rlist">${own.map(k=>{const [w,z]=k.split('_').map(Number);return`<span class="rel" title="${relicName(w,z)}"><i>${RELIC[z][0]}</i>${relicName(w,z)}<em>${relicTxt(w,z)}</em></span>`}).join('')}</div>`:'<small class="mute">Les boss de donjon peuvent en lâcher une (une par zone).</small>'}</div>`}
 function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h);const sets={};Object.values(h.eq).forEach(x=>{if(x&&x.set!=='relic')sets[x.setN]=(sets[x.setN]||0)+1});
   return sheet('Équipement',`<div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
   <div class="chips"><span class="chip">PV max ${S.hp}</span><span class="chip" style="color:#bfe3ff">${S.pa} PA</span><span class="chip">Prosp. ${S.pp}</span></div>
+  ${relicPanel()}
   <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];return it?itemBtn(it,`<span class="slotlab">${SLOTS[s]}</span>`):`<div class="item" style="opacity:.55;border-style:dashed"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b></div></div>`}).join('')}</div>
   ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}">${n} ${c}/4${c>=4?' · +1 PA ✓':' · 4 pièces : +1 PA'}</span></div>`).join('')}
   <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span><button class="tab ${ui.invSort==='tier'?'on':''}" data-a="invsort" data-v="tier">Palier</button><button class="tab ${ui.invSort==='type'?'on':''}" data-a="invsort" data-v="type">Type</button></div>
