@@ -248,6 +248,7 @@ const stat=(u,k)=>u.side==='h'?hstats(u)[k]:u[k];
 function heroEndTurn(h){const c=C();if(hasT('quartz')&&(h.turns||0)===1&&!h.st.dealtT1){addB(h,'quartz','dmg',5,9999);log(`${h.name} a pris le temps de viser : +5 % de dégâts pour le combat.`)}if(hasT('lierre')){const n=c.enemies.filter(e=>e.alive&&e.row==='front').length;if(n)shield(h,maxHp(h)*.03*n)}
   if(hasT('perle'))heroesAlive().filter(a=>a.row===h.row).forEach(a=>{const v=Math.round(maxHp(a)*.03);if(a.hp<maxHp(a))heal(h,a,v,v,{raw:1})})}
 const leadHero=()=>heroesAlive().slice().sort((a,b)=>(a.row===b.row?0:a.row==='front'?-1:1)||(a.slot||0)-(b.slot||0))[0];
+function nextOrder(){let o=allUnits().filter(u=>u.alive).sort((a,b)=>stat(b,'init')-stat(a,'init')||(a.side==='h'?-1:1));if(hasT('cauchemar')){const L=leadHero();if(L){o=o.filter(x=>x!==L);o.unshift(L)}}return o}
 function buildOrder(){const c=C();c.round++;c.order=allUnits().filter(u=>u.alive).sort((a,b)=>stat(b,'init')-stat(a,'init')||(a.side==='h'?-1:1)).map(u=>u.id);if(hasT('cauchemar')){const L=leadHero();if(L){c.order=c.order.filter(x=>x!==L.id);c.order.unshift(L.id)}}c.idx=0;log(`<span class="rd">Tour ${c.round}</span>`)}
 function startTurn(u){
   if(u.st.poison){const p=u.st.poison;u.hp=Math.max(0,u.hp-p.v);fx(u,'☠ -'+p.v,'debuff');log(`${u.name} subit ${p.v} de poison.`);p.t--;if(p.t<=0)delete u.st.poison;if(u.hp<=0){ko(u);return}}

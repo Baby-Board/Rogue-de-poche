@@ -137,6 +137,7 @@ const SPART={dmg:'<path d="M5 19 17 7" stroke="#fff6e0" stroke-width="2.6" strok
  trap:'<path d="M4 17h16M6 17l3-6 3 6 3-6 3 6" stroke="#fff6e0" stroke-width="2.2" fill="none" stroke-linejoin="round"/><circle cx="12" cy="6" r="2" fill="var(--ec)"/>',
  wpn:'<path d="M6 18 18 6" stroke="#e8dcc2" stroke-width="3" stroke-linecap="round"/><path d="M4.5 13.5l6 6" stroke="#c9a24c" stroke-width="2.6" stroke-linecap="round"/>'};
 function spellArt(S,id,h){if(S.wpn&&h&&h.eq.arme)return itemSvg(h.eq.arme);if(SPELLART[id])return SPELLART[id];const k=S.wpn?'wpn':S.trap?'trap':S.heal?'heal':S.base?(['all','row'].includes(S.tg)?'aoe':'dmg'):(['ally','allyOther','allAllies','allyKO'].includes(S.tg)?'ally':'buf');return`<svg viewBox="0 0 24 24" aria-hidden="true">${SPART[k]}</svg>`}
+function oiTok(u,cls){const m=u.side==='e'&&/ ([A-F])$/.exec(u.name);return`<span class="oi ${u.side} ${cls}">${ava(u)}${m?`<span class="otag">${m[1]}</span>`:''}${cls==='now'?`<small>${u.side==='h'?'à toi':'joue'}</small>`:''}</span>`}
 function vCombat(){
   const c=C();const cu=unit(c.cur);const hero=cu&&cu.side==='h'&&cu.alive&&!busy&&!c.over?cu:null;
   let tg=null,selSp=null;if(hero&&ui.sel){selSp=spellOf(hero,ui.sel);tg=validTargets(hero,ui.sel)}ui._tg=tg;
@@ -144,7 +145,7 @@ function vCombat(){
   const mod=c.mod&&MODS.find(m=>m.k===c.mod);
   const E=c.enemies,H=run.heroes;
   const stage=`<div class="stage">
-    <div class="ord2" aria-label="Ordre de jeu">${upcoming.map((u,i)=>`<span class="oi ${u.side} ${i===0?'now':''}">${ava(u)}${i===0?`<small>${u.side==='h'?'à toi':'joue'}</small>`:''}</span>`).join('')}</div>
+    <div class="ord2" aria-label="Ordre de jeu">${upcoming.map((u,i)=>oiTok(u,i===0?'now':'')).join('')}<span class="osep" aria-label="Tour suivant"><b>T${c.round+1}</b></span>${nextOrder().map(u=>oiTok(u,'nx')).join('')}</div>
     <div class="ordmeta"><span class="rtag">Tour ${c.round}</span>${mod?`<span class="modtag">${ico('hard')} ${mod.n} : ${mod.d}</span>`:''}</div>
     <div class="foes2">${stageRow(E.filter(e=>e.row==='back'),'sm',rowMarks('e','back'))}${stageRow(E.filter(e=>e.row==='front'),'lg',rowMarks('e','front'))}</div>
     <div class="front2"><span>Ligne de front</span></div>
