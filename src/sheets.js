@@ -3,8 +3,8 @@ const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',br
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
   const m=ui.modal;if(!m){modal.hidden=true;modal.innerHTML='';return}
-  const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu}[m];
-  if(!f||(['stats','form','inv','item','potion','log','inspect','menu'].includes(m)&&!run)){ui.modal=null;modal.hidden=true;return}
+  const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu,spell:shSpell}[m];
+  if(!f||(['stats','form','inv','item','potion','log','inspect','menu','spell'].includes(m)&&!run)){ui.modal=null;modal.hidden=true;return}
   const out=f();if(!out){ui.modal=null;modal.hidden=true;return}
   modal.innerHTML=out;modal.hidden=false}
 function shRules(){return sheet('Règles',`<div class="rules">
@@ -89,3 +89,15 @@ function shInspect(){const u=unit(ui.inspect);if(!u)return null;
 function shMenu(){return sheet('Menu',`<div class="iconbar" style="flex-wrap:wrap">${TOOLS.concat([['rules','scroll','Règles']]).map(([k,i,l])=>`<button class="ib" data-a="sheet" data-v="${k}">${ico(i)}${l}</button>`).join('')}</div>
   <button class="btn" data-a="sheet" data-v="save">Sauvegarde</button>
   <button class="btn" data-a="home">${ico('home')} Retour à l'accueil</button><p class="mute" style="margin:0;font-size:13px">La run est enregistrée à chaque action.</p>`)}
+
+function shSpell(){const c=C();const h=c&&unit(c.cur);if(!h||h.side!=='h')return null;const id=ui.spInfo,S=spellOf(h,id);if(!S)return null;
+  const foe=foesOf(h).find(e=>e.row==='front')||foesOf(h)[0];const rg=spellRange(h,S,S.heal?null:foe);const br=blockReason(h,id);
+  const lim=[];if(S.pt)lim.push(S.pt>1?`${S.pt}× par tour`:'1× par tour');if(S.pc)lim.push('1× par combat');if(S.cd)lim.push(`Recharge ${S.cd} tour${S.cd>1?'s':''}`);if(S.tcd)lim.push(`Même cible : attendre ${S.tcd} tour${S.tcd>1?'s':''}`);if(S.ptt)lim.push('1× par cible et par tour');
+  const ok=!br&&!busy;
+  return sheet(S.n,`<div class="spinfo" style="--ec:${S.heal?'#5fcf86':rg&&rg.e?ELC[rg.e]:'#6db8ef'}"><span class="art">${spellArt(S,id,h)}</span>
+    <div class="meta"><span class="pa2">${costOf(h,id)} PA</span><span class="tg">${S.tg?TGL[S.tg]:'Soi-même'}</span>
+    ${rg?`<b class="${rg.heal?'hl':'dm'}">${rg.heal?'✚ Soin':'⚔ Dégâts'} ${rangeTxt(rg)}${rg.e?` ${elIco(rg.e)}`:''}</b>${foe&&!rg.heal&&rg.e?`<small>sur ${foe.name}</small>`:''}`:''}</div></div>
+    <p class="txt" style="margin:0">${S.txt}</p>
+    ${lim.length?`<div class="chips">${lim.map(l=>`<span class="chip">${l}</span>`).join('')}</div>`:''}
+    ${br?`<p class="mute" style="margin:0">⛔ ${br}</p>`:''}
+    <button class="btn ${ok?'main':''}" data-a="spellpick" data-v="${id}" ${ok?'':'disabled'}>${ok?'Choisir ce sort':'Indisponible'}</button>`)}

@@ -17,6 +17,7 @@ const A={
   spell:id=>{const c=C();const h=unit(c.cur);if(!h||h.side!=='h'||busy)return;if(blockReason(h,id))return;const sp=spellOf(h,id);
     if(ui.sel===id&&!targetsFor(h,sp))return cast(h,id,null);ui.sel=ui.sel===id?null:id;render()},
   target:id=>{const c=C();const h=unit(c.cur);if(!h||!ui.sel||busy)return;const t=unit(id);const sp=spellOf(h,ui.sel);const vt=validTargets(h,ui.sel);if(!vt||!vt.includes(t))return;cast(h,ui.sel,t)},
+  spellpick:id=>{ui.modal=null;const c=C();const h=c&&unit(c.cur);if(!h||busy||blockReason(h,id))return render();const sp=spellOf(h,id);if(!targetsFor(h,sp))return cast(h,id,null);ui.sel=id;render()},
   inspect:id=>{ui.inspect=id;ui.modal='inspect';render()},
   end:()=>{clearTimeout(timer);endHeroTurn(false)},
   lootok:()=>afterLoot(),
@@ -54,7 +55,16 @@ const A={
   bestz:v=>{ui.bestZ=ui.bestZ===+v?null:+v;render()},
   enc:v=>{ui.encCls=v;render()},
 };
-document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=A[b.dataset.a];if(f)f(b.dataset.v)});
+/* appui long : fiche du sort (cartes) */
+let lpT=null,lpX=0,lpY=0,lpFired=0;
+document.addEventListener('pointerdown',e=>{const c=e.target.closest('.scard');if(!c)return;lpX=e.clientX;lpY=e.clientY;clearTimeout(lpT);
+  lpT=setTimeout(()=>{lpFired=Date.now();try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}ui.spInfo=c.dataset.v;ui.modal='spell';render()},430)});
+const lpCancel=()=>clearTimeout(lpT);
+document.addEventListener('pointerup',lpCancel);document.addEventListener('pointercancel',lpCancel);
+document.addEventListener('pointermove',e=>{if(Math.hypot(e.clientX-lpX,e.clientY-lpY)>10)clearTimeout(lpT)});
+document.addEventListener('contextmenu',e=>{if(e.target.closest('.scard'))e.preventDefault()});
+document.addEventListener('click',e=>{if(Date.now()-lpFired<700&&e.target.closest('.scard')){e.stopPropagation();e.preventDefault()}},true);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled||b.getAttribute('aria-disabled')==='true')return;const f=A[b.dataset.a];if(f)f(b.dataset.v)});
 document.addEventListener('change',e=>{if(e.target&&e.target.id==='loadfile'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{const t=document.getElementById('loadcode');if(t)t.value=String(r.result).trim();toast('Fichier chargé, touche « Charger »')};r.readAsText(e.target.files[0])}});
 modal.addEventListener('click',e=>{if(e.target===modal){ui.modal=null;ui.form=null;render()}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ui.modal){ui.modal=null;render()}});

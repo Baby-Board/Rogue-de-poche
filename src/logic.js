@@ -357,7 +357,7 @@ function victory(){
   run.heroes.forEach(h=>{const g=xpNeed(h.lvl)*clamp(.6+.3*(L-h.lvl),.15,3)*xpF;giveXp(h,g,lines);h.st={}});
   const rnd=p=>Math.random()<p*ppF?1:0;
   const geo=(n,p)=>{while(n<6&&Math.random()<Math.min(.8,p*ppF))n++;return n};
-  let n=kind==='boss'?geo(4,.5):kind==='hard'?geo(3,.5):geo(1,.5);
+  let n=kind==='boss'?geo(4,.55):kind==='hard'?geo(3,.55):geo(2,.45);if(kind!=='boss'&&c.enemies.length>=4&&n<6)n++;
   const w=DROPW[kind].slice();w[0]=w[0]/Math.max(.5,ppF);
   const items=[];for(let i=0;i<n;i++){const it=genItem({L,tier:tierOf(run.w,run.z),r:(kind==='hard'&&i===0)?Math.max(2,rollR(w)):rollR(w),set:Math.random()<.65?setOf(run.w,run.z):VAG});addInv(it);items.push(it)}
   const rk=run.w+'_'+run.z;let relic=null;if(kind==='boss'){const had=!!meta.relics[rk];if(!had&&Math.random()<.35*ppF){meta.relics[rk]=1;relic={k:rk,got:1}}else relic={k:rk,got:0,had}}

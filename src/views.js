@@ -157,12 +157,12 @@ function vCombat(){
     let hint;if(selSp){const ft=tg&&tg.find(x=>x.side==='e')||(selSp.heal?null:firstFoe);const rg=spellRange(hero,selSp,ft);
       hint=`<b>${selSp.n}</b>${rg?` · <span class="${rg.heal?'hl':'dm'}">${rg.heal?'✚':'⚔'} ${rangeTxt(rg)}</span>${rg.e?' '+elIco(rg.e):''}${ft&&!rg.heal&&rg.e?` <small>sur ${ft.name}</small>`:''}`:''} · <small>${selSp.txt}</small> <span class="act">${tg?'Touche une cible qui brille.':'Touche encore la carte pour lancer.'}</span>`}
     else if(!anyCastable(hero)){hint='<b>Plus aucun PA utilisable : le tour passe…</b>';autoPass(hero)}
-    else hint='<small>Choisis une carte, puis une cible. Touche un combattant pour son détail.</small>';
+    else hint='<small>Choisis une carte, puis une cible. Appui long sur une carte ou un combattant pour le détail.</small>';
     const S0=hstats(hero),ec=ELC[CLASSES[hero.cls].els[0]];
     panel=`<div class="who2">${ava(hero,'sm')}<b class="gilt">${hero.name}</b><span class="gems">${Array.from({length:Math.max(S0.pa,hero.pa)},(_,i)=>`<i class="${i<hero.pa?'on':''}"></i>`).join('')}</span><span class="panum">${hero.pa}<small>PA</small></span><button class="endbtn" data-a="end">Fin du tour</button></div>
      <div class="hint2">${hint}</div>
      <div class="hand2">${spellIds(hero).map(id=>{const S=spellOf(hero,id),br=blockReason(hero,id);const rg=S.base?spellRange(hero,S,S.heal?null:firstFoe):null;
-       return`<button class="scard ${spellKind(S)} ${ui.sel===id?'sel':''}" data-a="spell" data-v="${id}" ${br?'disabled':''} style="--ec:${S.heal?'#5fcf86':S.base?ec:'#6db8ef'}"><span class="pa">${costOf(hero,id)}</span><span class="art">${spellArt(S,id,hero)}</span><b>${S.n}</b><small>${br||(rg?`${rg.heal?'✚':'⚔'} ${rangeTxt(rg)}`:TGL[S.tg])}</small></button>`}).join('')}</div>`}
+       return`<button class="scard ${spellKind(S)} ${ui.sel===id?'sel':''}" data-a="spell" data-v="${id}" ${br?'aria-disabled="true"':''} style="--ec:${S.heal?'#5fcf86':S.base?ec:'#6db8ef'}"><span class="pa">${costOf(hero,id)}</span><span class="art">${spellArt(S,id,hero)}</span><b>${S.n}</b><small>${br||(rg?`${rg.heal?'✚':'⚔'} ${rangeTxt(rg)}`:TGL[S.tg])}</small></button>`}).join('')}</div>`}
   else panel=`<div class="waiting">${c.over?'Fin du combat':cu?`${ava(cu,'sm')} Tour de ${cu.name}`:''} <span class="dots"><i></i><i></i><i></i></span></div>`;
   return`<div class="backdrop dio">${scene(run.w)}</div><div class="floor2"></div><div class="combat dio">${runBar()}${stage}</div>
    <section class="panel dio"><div>${panel}<button class="logline log" data-a="sheet" data-v="log" aria-label="Journal">${lastLog}</button></div></section>`}
