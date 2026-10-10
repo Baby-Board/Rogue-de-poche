@@ -128,6 +128,7 @@ function fx(u,txt,cls){fxq.push({id:u.id,txt,cls})}
 function fxA(o){fxq.push(o)}
 const sab=u=>{u.st.sab=Math.min(5,(u.st.sab||0)+1)};
 const rage=u=>{u.st.rage=Math.min(5,(u.st.rage||0)+1);fx(u,'Rage '+u.st.rage,'buff')};
+function tshield(t,v,turns){v=Math.round(v);if(!t.alive||!v)return;shield(t,v);(t.st.tsh=t.st.tsh||[]).push({v,t:turns})}
 function shield(t,v){if(!t.alive)return;v=Math.round(v);t.st.shield=(t.st.shield||0)+v;fx(t,'+'+v+' 🛡','shield')}
 function heal(src,t,a,b,o={}){if(!t||!t.alive)return;let v=R(Math.round(a),Math.round(b));if(src.side==='h'&&!o.raw)v=Math.round(v*sc(src)*(1+hstats(src).soin/100));const real=Math.min(v,maxHp(t)-t.hp);t.hp+=real;if(t.side==='h')meta.cnt.healed=(meta.cnt.healed||0)+real;fx(t,'+'+v,'heal');log(`${t.name} récupère <b class="h">${v}</b> PV.`)}
 function poison(src,t,v,turns){v=Math.round(src.side==='h'?v*(1+hstats(src).pui/100):v);const p=t.st.poison||{v:0,t:0};t.st.poison={v:p.v+v,t:Math.max(p.t,turns)};fx(t,'☠ '+v,'debuff');log(`${t.name} est empoisonné (${t.st.poison.v}/tour).`)}
@@ -253,7 +254,8 @@ function buildOrder(){const c=C();c.round++;c.order=allUnits().filter(u=>u.alive
 function startTurn(u){
   if(u.st.poison){const p=u.st.poison;u.hp=Math.max(0,u.hp-p.v);fx(u,'☠ -'+p.v,'debuff');log(`${u.name} subit ${p.v} de poison.`);p.t--;if(p.t<=0)delete u.st.poison;if(u.hp<=0){ko(u);return}}
   if(u.regen&&u.hp<u.hpMax){const v=Math.round(u.hpMax*.06);u.hp=Math.min(u.hpMax,u.hp+v);fx(u,'+'+v,'heal')}
-  if(u.st.shield)u.st.shield=Math.floor(u.st.shield/2);
+  if(u.st.tsh){u.st.tsh.forEach(x=>x.t--);const gone=u.st.tsh.filter(x=>x.t<=0).reduce((a,x)=>a+x.v,0);u.st.tsh=u.st.tsh.filter(x=>x.t>0);if(gone)u.st.shield=Math.max(0,(u.st.shield||0)-gone);if(!u.st.tsh.length)delete u.st.tsh}
+  if(u.st.shield){const keep=(u.st.tsh||[]).reduce((a,x)=>a+x.v,0),cur=u.st.shield;u.st.shield=Math.min(cur,keep)+Math.floor(Math.max(0,cur-keep)/2)}
   ['taunt','invis','thornsT','weak','smoke','howl','blindBack','sight','critBuff'].forEach(k=>{if(u.st[k]){u.st[k]--;if(u.st[k]<=0)delete u.st[k]}});
   if(!u.st.thornsT)delete u.st.thorns;
   delete u.st.elan;delete u.st.cri;delete u.st.tourb;delete u.st.taken;delete u.st.resq;delete u.st.pfDisc;

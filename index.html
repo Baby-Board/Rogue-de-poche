@@ -568,7 +568,7 @@ body{background-color:var(--bg);background-image:
 .stage{position:relative;display:flex;flex-direction:column;gap:6px}
 .stage .modbar{margin-bottom:0}
 /* turn order: big and readable */
-.ord2{display:flex;align-items:flex-start;gap:8px;overflow-x:auto;scrollbar-width:none;padding:6px 4px 4px;margin-inline:-4px}
+.ord2{display:flex;align-items:flex-start;gap:8px;overflow-x:auto;scrollbar-width:none;padding:9px 9px 4px;margin-inline:-9px}
 .ord2::-webkit-scrollbar{display:none}
 .oi{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px}
 .oi .ava{width:44px;height:44px;font-size:24px;opacity:.85}
@@ -652,7 +652,7 @@ body{background-color:var(--bg);background-image:
 
 
 /* diorama compaction */
-.ord2{padding-top:2px}.oi .ava{width:40px;height:40px;font-size:22px}.oi.now .ava{width:50px;height:50px}
+.ord2{padding-top:9px}.oi .ava{width:40px;height:40px;font-size:22px}.oi.now .ava{width:50px;height:50px}
 .oi.rnd{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .modtag{display:inline-flex;align-items:center;gap:4px;font:800 11px/1 var(--f-body);color:#f5c2ae;background:rgba(58,21,16,.85);border:1px solid #a8402f;border-radius:99px;padding:4px 8px}
 .modtag .ic{width:13px;height:13px}
@@ -720,6 +720,7 @@ body{background-color:var(--bg);background-image:
 .mapwrap.parch .node.t-hard .ic{filter:brightness(1.6) drop-shadow(0 1px 1px rgba(0,0,0,.5))}
 .mapwrap.parch .node.t-boss{width:78px;height:78px;overflow:visible;background:radial-gradient(circle at 50% 35%,#5a3a24,#1d0e0a 75%);box-shadow:0 0 0 2px #2a1408,0 0 0 5px #d9a84f,0 0 0 7px #5a3d22,0 0 22px rgba(201,67,58,.5),0 8px 14px rgba(70,20,10,.6)}
 .mapwrap.parch .node.t-boss svg:not(.ic){width:100%;height:100%;border-radius:50%}
+.node.t-boss .pimg,.mpt .pimg,.fan .pimg{border-radius:50%;transform:none;object-fit:cover}
 .mapwrap.parch .node.done{opacity:.55;filter:sepia(.6) saturate(.6)}
 .mapwrap.parch .node.done::after{content:"";position:absolute;inset:10px;background:linear-gradient(45deg,transparent 46%,#8a1f14 46%,#8a1f14 54%,transparent 54%),linear-gradient(-45deg,transparent 46%,#8a1f14 46%,#8a1f14 54%,transparent 54%);opacity:.7}
 .mapwrap.parch .node.locked{opacity:.8;filter:sepia(.35)}
@@ -808,7 +809,7 @@ textarea.code{width:100%;font:12px/1.3 ui-monospace,monospace;color:var(--ink);b
 .pimg{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.14);user-select:none;-webkit-user-drag:none}
 .oi{position:relative}.oi .otag{position:absolute;right:-3px;top:28px;z-index:2;font:900 10.5px/15px var(--f-body);padding:0 5px;border-radius:7px;background:linear-gradient(180deg,#f3cf7c,#b47b26);color:#2b1904;border:1px solid #fff0c4}.oi.now .otag{top:38px}
 .oi.nx{opacity:.55}.oi.nx .ava{width:34px!important;height:34px!important;font-size:18px}.oi.nx .otag{top:22px;font-size:9.5px;line-height:13px}
-.osep{flex:none;align-self:stretch;display:flex;align-items:center;gap:0;margin:0 2px;padding:0 6px 0 8px;border-left:2px dashed rgba(240,200,120,.55)}.osep b{font:800 11px/1 var(--f-body);color:var(--brass2);background:rgba(5,12,13,.85);border:1px solid #9a6b22;border-radius:99px;padding:3px 7px;white-space:nowrap}
+.osep{flex:none;align-self:flex-start;display:flex;align-items:center;height:36px;margin:2px 0 0;padding:0 3px 0 5px;border-left:1px solid rgba(240,200,120,.28)}.osep b{font:800 9px/1 var(--f-body);color:rgba(240,214,150,.7);letter-spacing:.04em;white-space:nowrap}
 /* ---- juice : couche d'effets de combat ---- */
 @property --p{syntax:'<number>';inherits:true;initial-value:100}
 @property --lag{syntax:'<number>';inherits:true;initial-value:0}
@@ -874,7 +875,7 @@ const OPP={t:'a',a:'t',f:'e',e:'f'};
 
 /* ================= Classes ================= */
 const CLASSES={
-  lame:{n:'Lame',i:'🤺',role:'Mêlée',row:'front',els:['t','e'],vit:3.6,init:12,blurb:'Bretteuse : relance ses coups dans le tour, reprend son souffle et frappe de plus en plus fort avec Colère.',sp:['tourbillon','entaille','colere','cri','souffle']},
+  lame:{n:'Lame',i:'🤺',role:'Mêlée',row:'front',els:['t','e'],vit:3.6,init:12,blurb:'Bourrine : frappe de plus en plus fort à mesure qu’elle enchaîne, et protège sa rangée.',sp:['couperet','tourbillon','lgarde','colere','elan','bravoure']},
   archere:{n:'Archère',i:'🏹',role:'Distance',row:'back',els:['f','a'],vit:1.9,init:14,blurb:"Archère : ouvre sa ligne de vue pour atteindre l'arrière et brouille celle d'en face.",sp:['punitive','braise','balayant','pluie','visee','aigle']},
   rempart:{n:'Rempart',i:'🛡️',role:'Mêlée',row:'front',els:['t','e'],vit:4.6,init:7,blurb:"Gardien : couvre une rangée d'un bastion, renforce l'avant et ouvre la vue à l'arrière.",sp:['rp_guet','rp_ralli','rp_voile','rp_engourdi','rp_bastion','rp_fortin']},
   soigneuse:{n:'Soigneuse',i:'🌸',role:'Distance',row:'back',els:['f','e'],vit:2.2,init:11,blurb:'Chanteuse : soigne en frappant, remet sur pied et redonne des PA.',sp:['so_avide','so_double','so_restaure','so_choeur','so_elan','so_eveil']},
@@ -892,11 +893,12 @@ const ORDER=Object.keys(CLASSES);
 const TGL={unit:'Allié ou ennemi',front:'Ennemi (ligne avant)',any:'Ennemi (toute rangée)',prey:'La Proie (toute rangée)',ally:'Allié',allyOther:'Autre allié',allyKO:'Allié K.O.',self:'Soi-même',allAllies:"Toute l'équipe",all:'Tous les ennemis',row:'Rangée avant ennemie'};
 const SP={
   tourbillon:{n:'Tourbillon',pa:2,tg:'front',base:[8,12],pv:u=>{const k=u.st.tourb||0;return{base:[8+6*k,12+6*k]}},txt:'Frappe la cible. Chaque Tourbillon lancé ajoute +6 aux dégâts de base du sort jusqu’à la fin du tour.',fn:(u,t)=>{const k=u.st.tourb||0;hit(u,t,8+6*k,12+6*k);u.st.tourb=k+1;fx(u,'Tourbillon +'+6*(k+1),'buff')}},
-  entaille:{n:'Entaille',pa:3,tg:'front',base:[11,15],txt:"+1 Élan : +10 % de dégâts jusqu'à la fin du tour.",fn:(u,t)=>{hit(u,t,11,15);u.st.elan=(u.st.elan||0)+1}},
-  colere:{n:'Colère',pa:4,tg:'front',cd:2,base:[20,26],pv:u=>({mult:1+.25*(u.st.colere||0)}),txt:'Gros coup. +25 % de dégâts pour chaque Colère déjà lancée pendant le combat.',fn:(u,t)=>{const k=u.st.colere||0;hit(u,t,20,26,{mult:1+.25*k});u.st.colere=k+1;if(k)fx(u,'Colère ×'+(k+1),'buff')}},
-  cri:{n:'Cri de guerre',pa:1,tg:'self',pt:1,txt:'+30 % de dégâts ce tour. 1×/tour.',fn:u=>{u.st.cri=1;fx(u,'+30%','buff')}},
+  couperet:{n:'Couperet',pa:4,tg:'front',pt:1,base:[7,11],pv:u=>({mult:1+.07*u.pa}),txt:'Dégâts de zone sur toute la rangée ciblée. +7 % de dégâts par PA disponible avant le lancer. 1×/tour.',fn:(u,t)=>{const m=1+.07*(u._paBefore||0);rowOf(t).slice().forEach(x=>hit(u,x,7,11,{mult:m}))}},
+  lgarde:{n:'Garde de fer',pa:2,tg:'front',pt:2,base:[6,9],txt:'Dégâts modérés et bouclier de 8 % des PV max pour 1 tour, cumulable si relancé dans le même tour. 2×/tour.',fn:(u,t)=>{hit(u,t,6,9);if(u.alive)tshield(u,maxHp(u)*.08,1)}},
+  colere:{n:'Colère',pa:5,tg:'front',cd:2,base:[16,22],pv:u=>({mult:1+.5*(u.st.colere||0)}),txt:'Très gros dégâts. +50 % pour chaque Colère déjà lancée depuis le début du combat. Recharge 2 tours.',fn:(u,t)=>{const k=u.st.colere||0;hit(u,t,16,22,{mult:1+.5*k});u.st.colere=k+1;if(k)fx(u,'Colère ×'+(k+1),'buff')}},
+  elan:{n:'Élan furieux',pa:3,tg:'self',pt:1,cd:3,need:u=>(u.turns||0)>=2,needTxt:'Indisponible au 1er tour',txt:'Crédite immédiatement 5 PA pour ce tour ; ils sont perdus s’ils ne sont pas dépensés. Indisponible au premier tour. Recharge 3 tours.',fn:u=>{u.pa+=5;fx(u,'+5 PA','buff');log(`${u.name} s'emporte : +5 PA ce tour.`)}},
   bond:{n:'Bond',pa:2,tg:'any',pt:1,base:[7,10],txt:"Saute sur n'importe quelle rangée. 1×/tour.",fn:(u,t)=>hit(u,t,7,10)},
-  souffle:{n:'Second souffle',pa:0,tg:'self',cd:3,need:u=>(u.turns||0)>=2,needTxt:'À partir du 2e tour',txt:'Gagne 3 PA. Utilisable à partir de ton 2e tour.',fn:u=>{u.pa+=3;fx(u,'+3 PA','buff');log(`${u.name} reprend son souffle : +3 PA.`)}},
+  bravoure:{n:'Bravoure',pa:3,tg:'self',cd:3,txt:'Bouclier de 15 % des PV max de la Lame à toute sa rangée, elle comprise, pendant 2 tours. Recharge 3 tours.',fn:u=>{const v=maxHp(u)*.15;run.heroes.filter(h=>h.alive&&h.row===u.row).forEach(h=>tshield(h,v,2));log(`${u.name} galvanise sa rangée.`)}},
   fleche:{n:'Flèche ardente',pa:3,tg:'any',base:[9,12],txt:'Tir sur toute rangée.',fn:(u,t)=>hit(u,t,9,12)},
   punitive:{n:'Trait punitif',pa:4,tg:'front',base:[10,14],pv:u=>({mult:1+.08*u.pa}),txt:'Récompense une barre de PA pleine : +8 % de dégâts par PA disponible avant le lancer.',fn:(u,t)=>hit(u,t,10,14,{mult:1+.08*(u._paBefore||0)})},
   pluie:{n:'Pluie de flèches',pa:5,tg:'all',pt:1,base:[6,8],txt:'Touche tous les ennemis. 1×/tour.',fn:u=>foesOf(u).forEach(t=>hit(u,t,6,8))},
@@ -2904,6 +2906,8 @@ const PLACE={
  "msg": `<svg viewBox="0 0 360 160" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="msg-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060f1c"/><stop offset=".55" stop-color="#12304a"/><stop offset="1" stop-color="#3a6a74"/></linearGradient><linearGradient id="msg-road" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6d6a8" stop-opacity=".5"/><stop offset="1" stop-color="#b89a6a"/></linearGradient><radialGradient id="msg-glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9ad8e0" stop-opacity=".35"/><stop offset="1" stop-color="#9ad8e0" stop-opacity="0"/></radialGradient></defs><rect width="360" height="160" fill="url(#msg-sky)"/><ellipse cx="250" cy="80" rx="150" ry="40" fill="url(#msg-glow)"/><g fill="#fff"><circle cx="150" cy="10" r=".8"/><circle cx="180" cy="24" r="1"/><circle cx="214" cy="8" r=".7"/><circle cx="240" cy="30" r=".9"/><circle cx="268" cy="14" r="1.2"/><circle cx="296" cy="36" r=".7"/><circle cx="330" cy="12" r="1"/><circle cx="346" cy="44" r=".7"/><circle cx="200" cy="44" r=".6"/><circle cx="130" cy="34" r=".6"/><circle cx="318" cy="56" r=".6"/><circle cx="110" cy="16" r=".5"/></g><path d="M268 10l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z" fill="#fff4c8"/><path d="M180 24l.8 2.4 2.4.8-2.4.8-.8 2.4-.8-2.4-2.4-.8 2.4-.8z" fill="#fff4c8"/><path d="M232 20q8 -4 16 0" fill="none" stroke="#fff" stroke-width=".5" opacity=".4"/><path d="M150 82L196 44 222 62 262 30 300 58 326 42 360 66V96H150z" fill="#2c4e66"/><g fill="#d8e8f0"><path d="M196 44l9 7-5 0-4 4-4-3z"/><path d="M262 30l12 9-6-1-6 5-4-4-6 2z"/><path d="M326 42l8 6-5 1-3-2-3 2z"/></g><path d="M90 92L140 66 176 82 214 60 250 80 300 70 360 86V110H90z" fill="#1d3a4c"/><path d="M0 98Q60 82 120 92T240 90 360 94V160H0z" fill="#1a3030"/><path d="M0 110Q100 98 200 106T360 104V160H0z" fill="#132622"/><path d="M226 92Q234 92 232 94Q214 98 214 102Q216 108 186 112Q150 120 150 160H196Q192 124 226 114Q244 106 236 100Q232 96 240 92z" fill="url(#msg-road)"/><g fill="#0c1c1c"><path d="M290 108l8-24 8 24zM306 110l6-18 6 18zM40 106l7-22 7 22zM20 108l6-16 6 16z"/></g><g fill="#0e2020"><path d="M256 98l5-14 5 14zM266 98l4-10 4 10z"/></g><g transform="translate(118 0)"><rect x="-2.5" y="46" width="5" height="62" fill="#5a3a22"/><rect x="-2.5" y="46" width="1.5" height="62" fill="#7a5232"/><path d="M-4 52H26L32 57 26 62H-4z" fill="#8a5e36"/><path d="M-4 52H26L32 57" fill="none" stroke="#b07e4a" stroke-width="1"/><path d="M2 55h18M2 59h12" stroke="#4a2e18" stroke-width="1.2"/><path d="M4 68H-22L-28 73-22 78H4z" fill="#7a5230"/><path d="M-20 71h18M-16 75h12" stroke="#4a2e18" stroke-width="1.2"/><path d="M-3 84H18L22 88 18 92H-3z" fill="#6e4a2a"/><path d="M1 88h12" stroke="#4a2e18" stroke-width="1.2"/><circle cx="0" cy="46" r="3" fill="#c9923a"/><path d="M-6 108q6-6 12 0" fill="#2a4a3a"/></g><g><rect x="140" y="80" width="2" height="12" fill="#3a2a1a"/><circle cx="141" cy="78" r="8" fill="#ffcf6a" opacity=".2"/><rect x="138" y="74" width="6" height="7" rx="1" fill="#ffd27a"/><path d="M137 74h8M137 81h8" stroke="#3a2a1a" stroke-width="1.2"/></g><g fill="#0e1e1c"><path d="M70 104q-2-10 8-12 8 4 4 12z"/><path d="M160 104q2-6 8-6 4 4 2 6z"/></g><g fill="#cfffb0"><circle cx="96" cy="88" r="1"/><circle cx="170" cy="92" r=".9"/></g></svg>`,
 };
 
+
+Object.assign(SPELLART,{couperet:SPELLART.entaille,lgarde:SPELLART.cri,elan:SPELLART.souffle,bravoure:SPELLART.cri});
 /* Talisman and relic art. */
 const TALART={
  "mousse": `<svg viewBox="0 0 64 64"><g stroke="#1a1410" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"><path d="M32 27C17 18.2 17 5 32 5C47 5 47 18.2 32 27" fill="none" stroke="#1a1410" stroke-width="3.5"/><path d="M32 27C17 18.2 17 5 32 5C47 5 47 18.2 32 27" fill="none" stroke="#8a5a34" stroke-width="1.7"/><path d="M11 41C11 29 21 23 32 23C46 23 54 31 53 42C52 53 43 58 31 58C19 58 11 52 11 41Z" fill="#8e969a"/><path d="M53 42C52 53 43 58 31 58C21 58 13 53 12 46C20 53 41 55 53 42Z" fill="#6a7276" stroke="none"/><path d="M16 44C16 38 18 34 21 32C20 37 20 41 21 46Z" fill="#fff" opacity="0.25" stroke="none"/><path d="M12 47C24 52 40 52 52 47" fill="none" stroke="#1a1410" stroke-width="3.6"/><path d="M12 47C24 52 40 52 52 47" fill="none" stroke="#8a5a34" stroke-width="1.8"/><path d="M12 38C13 29 22 23 32 23C45 23 52 30 53 38C50 36 48 40 44 37C41 41 38 37 35 40C32 37 29 41 26 38C23 41 20 37 17 40C15 38 13 40 12 38Z" fill="#3f9a5e"/><path d="M17 31C21 26 27 25 33 25C40 25 45 27 49 32C45 31 42 33 38 31C34 33 30 31 26 33C22 31 20 33 17 31Z" fill="#5fcf86" stroke="none"/><circle cx="22" cy="34" r="1.2" fill="#2c7a46" stroke="none"/><circle cx="41" cy="35" r="1.2" fill="#2c7a46" stroke="none"/><circle cx="31" cy="34" r="1" fill="#8ae6a8" stroke="none"/><path d="M30 25C30 21 29 17 28 13" fill="none" stroke="#1a1410" stroke-width="3.2"/><path d="M30 25C30 21 29 17 28 13" fill="none" stroke="#2f7a45" stroke-width="1.4"/><path d="M28 14C24 11 20 13 19 16C23 18 26 17 28 14Z" fill="#8ae6a8"/><path d="M28 14C31 9 36 9 38 11C35 15 32 15 28 14Z" fill="#5fcf86"/><path d="M39 25C39 22 40 20 42 18" fill="none" stroke="#1a1410" stroke-width="3"/><path d="M39 25C39 22 40 20 42 18" fill="none" stroke="#2f7a45" stroke-width="1.2"/><path d="M42 18C44 15 47 15 48 16C47 19 44 20 42 18Z" fill="#8ae6a8"/></g></svg>`,
@@ -3097,6 +3101,7 @@ function fx(u,txt,cls){fxq.push({id:u.id,txt,cls})}
 function fxA(o){fxq.push(o)}
 const sab=u=>{u.st.sab=Math.min(5,(u.st.sab||0)+1)};
 const rage=u=>{u.st.rage=Math.min(5,(u.st.rage||0)+1);fx(u,'Rage '+u.st.rage,'buff')};
+function tshield(t,v,turns){v=Math.round(v);if(!t.alive||!v)return;shield(t,v);(t.st.tsh=t.st.tsh||[]).push({v,t:turns})}
 function shield(t,v){if(!t.alive)return;v=Math.round(v);t.st.shield=(t.st.shield||0)+v;fx(t,'+'+v+' 🛡','shield')}
 function heal(src,t,a,b,o={}){if(!t||!t.alive)return;let v=R(Math.round(a),Math.round(b));if(src.side==='h'&&!o.raw)v=Math.round(v*sc(src)*(1+hstats(src).soin/100));const real=Math.min(v,maxHp(t)-t.hp);t.hp+=real;if(t.side==='h')meta.cnt.healed=(meta.cnt.healed||0)+real;fx(t,'+'+v,'heal');log(`${t.name} récupère <b class="h">${v}</b> PV.`)}
 function poison(src,t,v,turns){v=Math.round(src.side==='h'?v*(1+hstats(src).pui/100):v);const p=t.st.poison||{v:0,t:0};t.st.poison={v:p.v+v,t:Math.max(p.t,turns)};fx(t,'☠ '+v,'debuff');log(`${t.name} est empoisonné (${t.st.poison.v}/tour).`)}
@@ -3222,7 +3227,8 @@ function buildOrder(){const c=C();c.round++;c.order=allUnits().filter(u=>u.alive
 function startTurn(u){
   if(u.st.poison){const p=u.st.poison;u.hp=Math.max(0,u.hp-p.v);fx(u,'☠ -'+p.v,'debuff');log(`${u.name} subit ${p.v} de poison.`);p.t--;if(p.t<=0)delete u.st.poison;if(u.hp<=0){ko(u);return}}
   if(u.regen&&u.hp<u.hpMax){const v=Math.round(u.hpMax*.06);u.hp=Math.min(u.hpMax,u.hp+v);fx(u,'+'+v,'heal')}
-  if(u.st.shield)u.st.shield=Math.floor(u.st.shield/2);
+  if(u.st.tsh){u.st.tsh.forEach(x=>x.t--);const gone=u.st.tsh.filter(x=>x.t<=0).reduce((a,x)=>a+x.v,0);u.st.tsh=u.st.tsh.filter(x=>x.t>0);if(gone)u.st.shield=Math.max(0,(u.st.shield||0)-gone);if(!u.st.tsh.length)delete u.st.tsh}
+  if(u.st.shield){const keep=(u.st.tsh||[]).reduce((a,x)=>a+x.v,0),cur=u.st.shield;u.st.shield=Math.min(cur,keep)+Math.floor(Math.max(0,cur-keep)/2)}
   ['taunt','invis','thornsT','weak','smoke','howl','blindBack','sight','critBuff'].forEach(k=>{if(u.st[k]){u.st[k]--;if(u.st[k]<=0)delete u.st[k]}});
   if(!u.st.thornsT)delete u.st.thorns;
   delete u.st.elan;delete u.st.cri;delete u.st.tourb;delete u.st.taken;delete u.st.resq;delete u.st.pfDisc;

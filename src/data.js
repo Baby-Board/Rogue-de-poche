@@ -17,7 +17,7 @@ const OPP={t:'a',a:'t',f:'e',e:'f'};
 
 /* ================= Classes ================= */
 const CLASSES={
-  lame:{n:'Lame',i:'🤺',role:'Mêlée',row:'front',els:['t','e'],vit:3.6,init:12,blurb:'Bretteuse : relance ses coups dans le tour, reprend son souffle et frappe de plus en plus fort avec Colère.',sp:['tourbillon','entaille','colere','cri','souffle']},
+  lame:{n:'Lame',i:'🤺',role:'Mêlée',row:'front',els:['t','e'],vit:3.6,init:12,blurb:'Bourrine : frappe de plus en plus fort à mesure qu’elle enchaîne, et protège sa rangée.',sp:['couperet','tourbillon','lgarde','colere','elan','bravoure']},
   archere:{n:'Archère',i:'🏹',role:'Distance',row:'back',els:['f','a'],vit:1.9,init:14,blurb:"Archère : ouvre sa ligne de vue pour atteindre l'arrière et brouille celle d'en face.",sp:['punitive','braise','balayant','pluie','visee','aigle']},
   rempart:{n:'Rempart',i:'🛡️',role:'Mêlée',row:'front',els:['t','e'],vit:4.6,init:7,blurb:"Gardien : couvre une rangée d'un bastion, renforce l'avant et ouvre la vue à l'arrière.",sp:['rp_guet','rp_ralli','rp_voile','rp_engourdi','rp_bastion','rp_fortin']},
   soigneuse:{n:'Soigneuse',i:'🌸',role:'Distance',row:'back',els:['f','e'],vit:2.2,init:11,blurb:'Chanteuse : soigne en frappant, remet sur pied et redonne des PA.',sp:['so_avide','so_double','so_restaure','so_choeur','so_elan','so_eveil']},
@@ -35,11 +35,12 @@ const ORDER=Object.keys(CLASSES);
 const TGL={unit:'Allié ou ennemi',front:'Ennemi (ligne avant)',any:'Ennemi (toute rangée)',prey:'La Proie (toute rangée)',ally:'Allié',allyOther:'Autre allié',allyKO:'Allié K.O.',self:'Soi-même',allAllies:"Toute l'équipe",all:'Tous les ennemis',row:'Rangée avant ennemie'};
 const SP={
   tourbillon:{n:'Tourbillon',pa:2,tg:'front',base:[8,12],pv:u=>{const k=u.st.tourb||0;return{base:[8+6*k,12+6*k]}},txt:'Frappe la cible. Chaque Tourbillon lancé ajoute +6 aux dégâts de base du sort jusqu’à la fin du tour.',fn:(u,t)=>{const k=u.st.tourb||0;hit(u,t,8+6*k,12+6*k);u.st.tourb=k+1;fx(u,'Tourbillon +'+6*(k+1),'buff')}},
-  entaille:{n:'Entaille',pa:3,tg:'front',base:[11,15],txt:"+1 Élan : +10 % de dégâts jusqu'à la fin du tour.",fn:(u,t)=>{hit(u,t,11,15);u.st.elan=(u.st.elan||0)+1}},
-  colere:{n:'Colère',pa:4,tg:'front',cd:2,base:[20,26],pv:u=>({mult:1+.25*(u.st.colere||0)}),txt:'Gros coup. +25 % de dégâts pour chaque Colère déjà lancée pendant le combat.',fn:(u,t)=>{const k=u.st.colere||0;hit(u,t,20,26,{mult:1+.25*k});u.st.colere=k+1;if(k)fx(u,'Colère ×'+(k+1),'buff')}},
-  cri:{n:'Cri de guerre',pa:1,tg:'self',pt:1,txt:'+30 % de dégâts ce tour. 1×/tour.',fn:u=>{u.st.cri=1;fx(u,'+30%','buff')}},
+  couperet:{n:'Couperet',pa:4,tg:'front',pt:1,base:[7,11],pv:u=>({mult:1+.07*u.pa}),txt:'Dégâts de zone sur toute la rangée ciblée. +7 % de dégâts par PA disponible avant le lancer. 1×/tour.',fn:(u,t)=>{const m=1+.07*(u._paBefore||0);rowOf(t).slice().forEach(x=>hit(u,x,7,11,{mult:m}))}},
+  lgarde:{n:'Garde de fer',pa:2,tg:'front',pt:2,base:[6,9],txt:'Dégâts modérés et bouclier de 8 % des PV max pour 1 tour, cumulable si relancé dans le même tour. 2×/tour.',fn:(u,t)=>{hit(u,t,6,9);if(u.alive)tshield(u,maxHp(u)*.08,1)}},
+  colere:{n:'Colère',pa:5,tg:'front',cd:2,base:[16,22],pv:u=>({mult:1+.5*(u.st.colere||0)}),txt:'Très gros dégâts. +50 % pour chaque Colère déjà lancée depuis le début du combat. Recharge 2 tours.',fn:(u,t)=>{const k=u.st.colere||0;hit(u,t,16,22,{mult:1+.5*k});u.st.colere=k+1;if(k)fx(u,'Colère ×'+(k+1),'buff')}},
+  elan:{n:'Élan furieux',pa:3,tg:'self',pt:1,cd:3,need:u=>(u.turns||0)>=2,needTxt:'Indisponible au 1er tour',txt:'Crédite immédiatement 5 PA pour ce tour ; ils sont perdus s’ils ne sont pas dépensés. Indisponible au premier tour. Recharge 3 tours.',fn:u=>{u.pa+=5;fx(u,'+5 PA','buff');log(`${u.name} s'emporte : +5 PA ce tour.`)}},
   bond:{n:'Bond',pa:2,tg:'any',pt:1,base:[7,10],txt:"Saute sur n'importe quelle rangée. 1×/tour.",fn:(u,t)=>hit(u,t,7,10)},
-  souffle:{n:'Second souffle',pa:0,tg:'self',cd:3,need:u=>(u.turns||0)>=2,needTxt:'À partir du 2e tour',txt:'Gagne 3 PA. Utilisable à partir de ton 2e tour.',fn:u=>{u.pa+=3;fx(u,'+3 PA','buff');log(`${u.name} reprend son souffle : +3 PA.`)}},
+  bravoure:{n:'Bravoure',pa:3,tg:'self',cd:3,txt:'Bouclier de 15 % des PV max de la Lame à toute sa rangée, elle comprise, pendant 2 tours. Recharge 3 tours.',fn:u=>{const v=maxHp(u)*.15;run.heroes.filter(h=>h.alive&&h.row===u.row).forEach(h=>tshield(h,v,2));log(`${u.name} galvanise sa rangée.`)}},
   fleche:{n:'Flèche ardente',pa:3,tg:'any',base:[9,12],txt:'Tir sur toute rangée.',fn:(u,t)=>hit(u,t,9,12)},
   punitive:{n:'Trait punitif',pa:4,tg:'front',base:[10,14],pv:u=>({mult:1+.08*u.pa}),txt:'Récompense une barre de PA pleine : +8 % de dégâts par PA disponible avant le lancer.',fn:(u,t)=>hit(u,t,10,14,{mult:1+.08*(u._paBefore||0)})},
   pluie:{n:'Pluie de flèches',pa:5,tg:'all',pt:1,base:[6,8],txt:'Touche tous les ennemis. 1×/tour.',fn:u=>foesOf(u).forEach(t=>hit(u,t,6,8))},
