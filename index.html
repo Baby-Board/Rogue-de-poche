@@ -786,7 +786,7 @@ body{background-color:var(--bg);background-image:
 .fan>span svg{width:100%;height:100%}
 .fan.round>span{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45;background:#1a1110}
 .fan.round>span .med{width:100%;height:100%}
-.fan.ghost>span{filter:grayscale(1) brightness(.4);opacity:.8}
+.fan.ghost>span>*{filter:grayscale(1) brightness(.45)}
 .tico{width:50px;height:50px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(226,178,87,.2),transparent 70%)}.tico .ic{width:36px;height:36px}
 .rlock{inset:auto -2px -2px auto!important;width:20px;height:20px;border-radius:50%;background:#0d1a1b;border:1px solid #3f5a56}
 .rlock .ic{width:11px!important;height:11px!important}
@@ -823,8 +823,11 @@ img.scene{object-fit:cover;display:block}
 .node .ic.icimg{width:86%!important;height:86%!important;transform:none;-webkit-mask:none;mask:none;border-radius:50%}
 .emblem .ic.icimg{width:100%!important;height:100%!important;transform:none;-webkit-mask:none;mask:none}
 .tico .ic.icimg{width:58px;height:58px}
-.fan.ghost{filter:saturate(.5) brightness(.8)!important;opacity:1!important}
+.fan.ghost{filter:none!important;opacity:1!important}
 .iimg{object-fit:cover;border-radius:22%;-webkit-mask:radial-gradient(circle,#000 60%,transparent 74%);mask:radial-gradient(circle,#000 60%,transparent 74%);transform:scale(1.15)}
+.fan.round>span .icoimg{border-radius:50%;-webkit-mask:none;mask:none;transform:scale(1.12)}
+.tico{width:52px;height:52px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45,0 4px 8px rgba(0,0,0,.6);background:#1a1110}
+.tico .ic.icimg{width:100%!important;height:100%!important;transform:scale(1.15);-webkit-mask:none;mask:none;border-radius:50%}
 /* ---- juice : couche d'effets de combat ---- */
 @property --p{syntax:'<number>';inherits:true;initial-value:100}
 @property --lag{syntax:'<number>';inherits:true;initial-value:0}
@@ -853,7 +856,7 @@ img.scene{object-fit:cover;display:block}
 .hexa{width:78px;height:78px;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);background:radial-gradient(circle,transparent 52%,rgba(124,192,236,.55) 70%,rgba(200,235,255,.9) 76%,transparent 80%)}
 .ray{width:3px;height:22px;border-radius:3px;background:linear-gradient(0deg,transparent,#ffe08a,#fff)}
 .wisp{width:26px;height:34px;border-radius:50% 50% 45% 45%;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.9),rgba(220,230,255,.4) 50%,transparent 72%);filter:blur(1px)}
-.ghost{position:absolute;margin:0;max-width:none!important;transform-origin:50% 60%}
+.kghost{position:absolute;margin:0;max-width:none!important;transform-origin:50% 60%}
 .cardfly{position:absolute;margin:0;box-shadow:0 0 0 2px var(--brass2),0 0 26px rgba(255,214,120,.7)!important}
 .scrflash{position:fixed!important;inset:0;width:auto;height:auto;background:radial-gradient(circle,transparent 30%,var(--c) 120%);mix-blend-mode:screen}
 .ban2{left:0!important;width:100%;display:grid;place-items:center}
@@ -3410,8 +3413,8 @@ function vHome(){
   const nT=Object.keys(meta.talis).length,nR=Object.keys(meta.relics).filter(k=>RELART[k]).length,nA=Object.keys(meta.alphas).length,nQ=Object.keys(meta.quests).filter(q=>QUESTS[q]).length;
   const ownT=TALIS.filter(t=>meta.talis[t.id]).map(t=>t.id),ownR=Object.keys(meta.relics).filter(k=>RELART[k]);
   const fan=(arr,cls)=>`<span class="fan ${cls}">${arr.slice(-3).map((h,i,a)=>`<span style="--k:${i-(a.length-1)/2}">${h}</span>`).join('')}</span>`;
-  const tal=ownT.length?fan(ownT.map(k=>TALART[k]),''):fan([TALART.lune,TALART.mousse,TALART.braise],'ghost');
-  const rel=ownR.length?fan(ownR.map(k=>RELART[k]),''):fan([RELART['0_1'],RELART['0_0'],RELART['0_3']],'ghost');
+  const tal=ownT.length?fan(ownT.map(k=>TALART[k]),'round'):fan([TALART.lune,TALART.mousse,TALART.braise],'round ghost');
+  const rel=ownR.length?fan(ownR.map(k=>RELART[k]),'round'):fan([RELART['0_1'],RELART['0_0'],RELART['0_3']],'round ghost');
   const alph=Object.keys(meta.alphas).slice(-3).map(k=>{const [w,i]=k.split('_').map(Number);const r=WORLDS[w]&&WORLDS[w].roster[i];return r?PORTRAIT[r[0]]:''}).filter(Boolean);
   const best=fan(alph.length?alph:[PORTRAIT[WORLDS[0].roster[0][0]]],alph.length?'round':'round ghost');
   const tiles=[['talis','Talismans',`${nT} / ${TALIS.length}`,tal],['relics','Reliques',`${nR} / ${WORLDS.length*ZONES}`,rel],['best','Bestiaire',`${nA} alphas`,best],
@@ -3681,7 +3684,7 @@ function flushFx(snap,entering,changedTo){
   /* 5. fantômes des ennemis vaincus, puis les survivants glissent à leur nouvelle place */
   let koEnd=0;
   if(!rm)for(const id in snap){const s=snap[id];if(id[0]==="_"||!s||!s.clone)continue;const t=imp[id]!=null?imp[id]:last;const g=s.clone;
-    g.classList.remove('tgt','cur');g.classList.add('ghost');g.querySelectorAll('.intent,.tpips').forEach(x=>x.remove());g.removeAttribute('data-uid');
+    g.classList.remove('tgt','cur');g.classList.add('kghost');g.querySelectorAll('.intent,.tpips').forEach(x=>x.remove());g.removeAttribute('data-uid');
     g.style.left=s.tr.x+'px';g.style.top=s.tr.y+'px';g.style.width=s.tr.w+'px';layer().appendChild(g);
     const gr=g.querySelector('.ring');gr&&gr.animate([{'--p':s.p},{'--p':0}],{duration:260,delay:t,fill:'both'});
     const col=getComputedStyle(g).getPropertyValue('--elc')||'#ffd27a',P=ctr(s.r);

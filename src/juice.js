@@ -97,7 +97,7 @@ function flushFx(snap,entering,changedTo){
   /* 5. fantômes des ennemis vaincus, puis les survivants glissent à leur nouvelle place */
   let koEnd=0;
   if(!rm)for(const id in snap){const s=snap[id];if(id[0]==="_"||!s||!s.clone)continue;const t=imp[id]!=null?imp[id]:last;const g=s.clone;
-    g.classList.remove('tgt','cur');g.classList.add('ghost');g.querySelectorAll('.intent,.tpips').forEach(x=>x.remove());g.removeAttribute('data-uid');
+    g.classList.remove('tgt','cur');g.classList.add('kghost');g.querySelectorAll('.intent,.tpips').forEach(x=>x.remove());g.removeAttribute('data-uid');
     g.style.left=s.tr.x+'px';g.style.top=s.tr.y+'px';g.style.width=s.tr.w+'px';layer().appendChild(g);
     const gr=g.querySelector('.ring');gr&&gr.animate([{'--p':s.p},{'--p':0}],{duration:260,delay:t,fill:'both'});
     const col=getComputedStyle(g).getPropertyValue('--elc')||'#ffd27a',P=ctr(s.r);
