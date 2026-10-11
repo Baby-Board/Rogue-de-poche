@@ -8,8 +8,8 @@ R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));S=os.path.join(R,'
 paint={}
 # recadrage des héros : carré centré sur le visage (coordonnées sur 256 px)
 HCROP={'cls_archere':(23,5,193,175),'cls_artificier':(27,5,197,175),'cls_assassin':(40,5,210,175),'cls_chrono':(43,5,213,175),
- 'cls_flambeur':(35,10,205,180),'cls_lame':(27,5,197,175),'cls_lancier':(25,5,195,175),'cls_passeuse':(94,24,254,184),
- 'cls_rempart':(43,0,213,170),'cls_soigneuse':(27,0,197,170),'cls_traqueur':(28,35,228,235)}
+ 'cls_flambeur':(35,10,205,180),'cls_lame':(27,5,197,175),'cls_lancier':(25,5,195,175),
+ 'cls_rempart':(43,0,213,170),'cls_soigneuse':(27,0,197,170)}
 d=os.path.join(R,'art','portraits')
 for f in sorted(os.listdir(d)):
     if not f.endswith('.jpg'):continue
