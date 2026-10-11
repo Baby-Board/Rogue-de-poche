@@ -107,13 +107,13 @@ function enterNode(r,i){const nd=run.rows[r][i];run.pos={r,i};run.visited.push(r
   switch(t){
     case'fight':case'hard':case'boss':return startCombat(t,nd.mod);
     case'taverne':run.tav={opts:shuffle(ORDER.filter(c=>!run.heroes.some(h=>h.cls===c))).slice(0,3),done:false};run.phase='taverne';break;
-    case'sanct':run.alphaB+=6;meta.cnt.sanct++;run.msg={icon:'🗿',title:'Sanctuaire',text:`Une statue couverte d'offrandes. Les monstres alpha apparaissent plus souvent pour le reste de la run (${alphaChance()} % par monstre).`};run.phase='msg';break;
+    case'sanct':run.alphaB+=2;meta.cnt.sanct++;run.msg={icon:'🗿',title:'Sanctuaire',text:`Une statue couverte d'offrandes. Les monstres alpha apparaissent plus souvent pour le reste de la run (${alphaChance()} % par monstre).`};run.phase='msg';break;
     case'shop':{const L=zoneLevel(r),tr=tierOf(run.w,run.z);run.shop={items:Array.from({length:5},()=>{const it=genItem({L,tier:tr,r:rollR(DROPW.shop),set:Math.random()<.7?setOf(run.w,run.z):VAG});return{it,price:buyPrice(it),sold:false}})};ui.shopTab='buy';run.phase='shop';break}
     case'forge':run.phase='forge';break;
     case'event':startEvent();break;
   }
   checkQuests();saveRun();render()}
-const alphaChance=()=>5+run.alphaB;
+const alphaChance=()=>2+run.alphaB;
 
 /* ================= Combat helpers ================= */
 const C=()=>run.combat;

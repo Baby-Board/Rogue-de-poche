@@ -3101,13 +3101,13 @@ function enterNode(r,i){const nd=run.rows[r][i];run.pos={r,i};run.visited.push(r
   switch(t){
     case'fight':case'hard':case'boss':return startCombat(t,nd.mod);
     case'taverne':run.tav={opts:shuffle(ORDER.filter(c=>!run.heroes.some(h=>h.cls===c))).slice(0,3),done:false};run.phase='taverne';break;
-    case'sanct':run.alphaB+=6;meta.cnt.sanct++;run.msg={icon:'🗿',title:'Sanctuaire',text:`Une statue couverte d'offrandes. Les monstres alpha apparaissent plus souvent pour le reste de la run (${alphaChance()} % par monstre).`};run.phase='msg';break;
+    case'sanct':run.alphaB+=2;meta.cnt.sanct++;run.msg={icon:'🗿',title:'Sanctuaire',text:`Une statue couverte d'offrandes. Les monstres alpha apparaissent plus souvent pour le reste de la run (${alphaChance()} % par monstre).`};run.phase='msg';break;
     case'shop':{const L=zoneLevel(r),tr=tierOf(run.w,run.z);run.shop={items:Array.from({length:5},()=>{const it=genItem({L,tier:tr,r:rollR(DROPW.shop),set:Math.random()<.7?setOf(run.w,run.z):VAG});return{it,price:buyPrice(it),sold:false}})};ui.shopTab='buy';run.phase='shop';break}
     case'forge':run.phase='forge';break;
     case'event':startEvent();break;
   }
   checkQuests();saveRun();render()}
-const alphaChance=()=>5+run.alphaB;
+const alphaChance=()=>2+run.alphaB;
 
 /* ================= Combat helpers ================= */
 const C=()=>run.combat;
@@ -3734,7 +3734,7 @@ const EVENTS=[
   {l:()=>'Le laisser',f:()=>'Mieux vaut ne pas tenter le diable.'}]},
  {id:'pierre',ban:'msg',t:'Une pierre de veille',x:"Une haute pierre levée, couverte de noms d'aventuriers. Certains brillent encore.",c:[
   {l:()=>'Méditer devant elle',f:()=>{const lines=[];run.heroes.forEach(h=>giveXp(h,xpNeed(h.lvl)*.8,lines));return'Les héros gagnent de l’expérience.'+(lines.length?' '+lines.join(' '):'')}},
-  {l:()=>'Graver vos noms',f:()=>{run.alphaB+=6;return`Les monstres alpha vous chercheront : ${alphaChance()} % par monstre pour le reste de la run.`}},
+  {l:()=>'Graver vos noms',f:()=>{run.alphaB+=2;return`Les monstres alpha vous chercheront : ${alphaChance()} % par monstre pour le reste de la run.`}},
   {l:()=>'Continuer',f:()=>'Vous reprenez la route.'}]},
  {id:'des',ban:'taverne',t:'Des joueurs de dés',x:"Trois gobelins hilares jouent aux dés sur un tonneau. « Une partie ? Double ou rien ! »",c:[
   {l:()=>`Parier ${Math.floor(run.gold*.3)} écus`,ok:()=>run.gold>=10,no:'Bourse trop légère',f:()=>{const m=Math.floor(run.gold*.3);if(Math.random()<.5){run.gold+=m;return`Double six ! +${m} écus.`}run.gold-=m;return`Les dés sont pipés… −${m} écus.`}},

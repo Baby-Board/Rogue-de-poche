@@ -28,7 +28,7 @@ const EVENTS=[
   {l:()=>'Le laisser',f:()=>'Mieux vaut ne pas tenter le diable.'}]},
  {id:'pierre',ban:'msg',t:'Une pierre de veille',x:"Une haute pierre levée, couverte de noms d'aventuriers. Certains brillent encore.",c:[
   {l:()=>'Méditer devant elle',f:()=>{const lines=[];run.heroes.forEach(h=>giveXp(h,xpNeed(h.lvl)*.8,lines));return'Les héros gagnent de l’expérience.'+(lines.length?' '+lines.join(' '):'')}},
-  {l:()=>'Graver vos noms',f:()=>{run.alphaB+=6;return`Les monstres alpha vous chercheront : ${alphaChance()} % par monstre pour le reste de la run.`}},
+  {l:()=>'Graver vos noms',f:()=>{run.alphaB+=2;return`Les monstres alpha vous chercheront : ${alphaChance()} % par monstre pour le reste de la run.`}},
   {l:()=>'Continuer',f:()=>'Vous reprenez la route.'}]},
  {id:'des',ban:'taverne',t:'Des joueurs de dés',x:"Trois gobelins hilares jouent aux dés sur un tonneau. « Une partie ? Double ou rien ! »",c:[
   {l:()=>`Parier ${Math.floor(run.gold*.3)} écus`,ok:()=>run.gold>=10,no:'Bourse trop légère',f:()=>{const m=Math.floor(run.gold*.3);if(Math.random()<.5){run.gold+=m;return`Double six ! +${m} écus.`}run.gold-=m;return`Les dés sont pipés… −${m} écus.`}},
