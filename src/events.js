@@ -63,7 +63,7 @@ function dailyCfg(){const key=todayKey();const s=hashRes('daily-'+key);const rnd
 function shuffleR(a,rnd){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function startDaily(){const D=dailyCfg();ui.world=D.w;ui.star=D.star;startRun(D.cls);run.daily={key:D.key,seed:D.seed,mod:D.mod,kills:0};
   run.rows=withSeed(D.seed+run.z*977,genMap);meta.daily=meta.daily||{};const R=meta.daily[D.key]=meta.daily[D.key]||{best:0,tries:0};R.tries++;saveMeta();saveRun()}
-function dailyScore(win){const d=run.daily;return(run.z*8+run.pos.r)*100+(d.kills||0)*10+Math.round(run.gold/10)+(win?3000:0)}
+function dailyScore(win){const d=run.daily;return(run.z*(MAPR+2)+run.pos.r)*50+(d.kills||0)*10+Math.round(run.gold/10)+(win?3000:0)}
 function dailyEnd(win){if(!run||!run.daily||run.daily.scored)return;const sc=dailyScore(win);run.daily.score=sc;run.daily.scored=1;const R=meta.daily[run.daily.key]=meta.daily[run.daily.key]||{best:0,tries:1};run.daily.prev=R.best;R.best=Math.max(R.best,sc);saveMeta()}
 
 /* ================= Save export / import ================= */

@@ -81,7 +81,7 @@ function mapDeco(H,rows,y){let s=hashRes(run.w+'-'+run.z+'-deco');const rnd=()=>
     else o+=`<circle cx="${x.toFixed(0)}" cy="${yy.toFixed(0)}" r="2" fill="${ink}" opacity=".35"/><circle cx="${(x+6).toFixed(0)}" cy="${(yy+3).toFixed(0)}" r="1.4" fill="${ink}" opacity=".3"/>`}
   return o}
 function vMap(){
-  const rows=run.rows,rowH=88,top=120,H=top+(rows.length-1)*rowH+70,y=r=>top+r*rowH,cur=run.pos;
+  const rows=run.rows,rowH=80,top=120,H=top+(rows.length-1)*rowH+70,y=r=>top+r*rowH,cur=run.pos;
   const avail=cur.r<rows.length-1?rows[cur.r][cur.i].l:[];
   let lines='';rows.forEach((row,r)=>row.forEach((nd,i)=>nd.l.forEach(j=>{const b=rows[r+1][j];const a1=run.visited.indexOf(r+':'+i),a2=run.visited.indexOf((r+1)+':'+j);const walked=a1>=0&&a2===a1+1;const open=r===cur.r&&i===cur.i;const y1=y(r),y2=y(r+1),ym=(y1+y2)/2;
     lines+=`<path d="M${nd.x} ${y1}C${nd.x} ${ym} ${b.x} ${ym} ${b.x} ${y2}" class="${walked?'walked':open?'open':''}" vector-effect="non-scaling-stroke"/>`})));
@@ -93,7 +93,7 @@ function vMap(){
     info=`<div class="nodeinfo"><span class="node t-${nd.t}">${ico(nd.t)}</span><div class="meta"><b>${N.n}${mod?` · ${mod.n}`:''}</b><small>${d}</small></div><button class="btn main sm" data-a="go" data-v="${ui.mapSel}">Y aller</button></div>`}
   return`${runBar()}${runTools()}${teamPanel()}
   <div class="mapwrap parch" style="height:${H}px">${scene(run.w,'top')}${ROSE}<svg class="mapdeco" style="height:${H}px" viewBox="0 0 390 ${H}" preserveAspectRatio="none" aria-hidden="true">${mapDeco(H,rows,y)}</svg><svg class="mapsvg" style="height:${H}px" viewBox="0 0 100 ${H}" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>${nodes}<span class="mtitle">${zoneTitle()}</span></div>
-  ${info||`<p class="maphint"><span>Touche une case qui scintille pour voir ce qu'elle contient.</span><span>Niveau ${zoneLevel(0)}–${zoneLevel(7)}</span><span>Alphas ${alphaChance()} %</span></p>`}`}
+  ${info||`<p class="maphint"><span>Touche une case qui scintille pour voir ce qu'elle contient.</span><span>Niveau ${zoneLevel(0)}–${zoneLevel(MAPR+1)}</span><span>Alphas ${alphaChance()} %</span></p>`}`}
 
 /* ---------- Combat ---------- */
 function resChips(u){const l=EL.filter(e=>u.res[e]);if(!l.length)return'';return`<span class="chip res">${l.map(e=>`<span class="${u.res[e]<0?'neg':''}">${elIco(e)}${u.res[e]>0?'+':''}${u.res[e]}</span>`).join('')}</span>`}

@@ -3070,16 +3070,18 @@ function unequip(h,slot){const it=h.eq[slot];if(!it)return;const before=maxHp(h)
 function findItem(id){let it=run.inv.find(x=>x.id===id);if(it)return{it,where:'inv'};for(const h of run.heroes)for(const s in h.eq)if(h.eq[s]&&h.eq[s].id===id)return{it:h.eq[s],where:h};return null}
 
 /* ================= Map ================= */
-function nodeType(r){if(r===1)return'fight';const w=[['fight',40],['hard',r>=2?16:0],['taverne',9],['sanct',6],['portal',8],['shop',7],['forge',6],['event',12]];let x=Math.random()*w.reduce((s,v)=>s+v[1],0);for(const [k,v] of w){if((x-=v)<0)return k}return'fight'}
+const MAPR=12;
+function nodeType(r){if(r<=2)return'fight';const w=[['fight',52],['hard',14],['taverne',5],['sanct',4],['portal',5],['shop',6],['forge',5],['event',9]];let x=Math.random()*w.reduce((s,v)=>s+v[1],0);for(const [k,v] of w){if((x-=v)<0)return k}return'fight'}
 function genMap(){const rows=[[{t:'start',l:[]}]];
-  for(let r=1;r<=6;r++){const n=R(2,4),row=[];for(let i=0;i<n;i++)row.push({t:nodeType(r),l:[]});if((r===3||r===6)&&!row.some(n=>n.t==='taverne'))row[R(0,n-1)].t='taverne';rows.push(row)}
+  const force={4:'taverne',6:'shop',8:'taverne',10:'forge',12:'taverne'};
+  for(let r=1;r<=MAPR;r++){const n=R(2,3)+(Math.random()<.2?1:0),row=[];for(let i=0;i<n;i++)row.push({t:nodeType(r),l:[]});const f=force[r];if(f&&!row.some(n=>n.t===f))row[R(0,n-1)].t=f;rows.push(row)}
   rows.push([{t:'boss',l:[]}]);
   rows.forEach(row=>row.forEach((nd,i)=>{nd.x=clamp(Math.round((i+1)/(row.length+1)*100+(row.length>1?R(-5,5):0)),10,90);if(nd.t==='hard')nd.mod=pick(MODS).k}));
   for(let r=0;r<rows.length-1;r++){const A=rows[r],B=rows[r+1];A.forEach((nd,i)=>{if(A.length===1){nd.l=B.map((_,k)=>k);return}if(B.length===1){nd.l=[0];return}const j=Math.round(i*(B.length-1)/(A.length-1));nd.l=[j];if(Math.random()<.45){const j2=j+(Math.random()<.5?-1:1);if(j2>=0&&j2<B.length)nd.l.push(j2)}});
     B.forEach((nd,j)=>{if(!A.some(a=>a.l.includes(j))){let best=0,bd=1e9;A.forEach((a,i)=>{const d=Math.abs(a.x-nd.x);if(d<bd){bd=d;best=i}});A[best].l.push(j)}})}
   return rows}
-const zoneLevel=(r=0)=>{const [lo,hi]=WORLDS[run.w].lv;return Math.round(lo+(hi-lo)*(run.z+r/8)/ZONES)};
-const diffMul=(r=0)=>(1+.18*(run.star-1))*(1+.035*(run.w*ZONES+run.z+r/8))*(run.w===0&&run.z<2?.65+.2*run.z:1);
+const zoneLevel=(r=0)=>{const [lo,hi]=WORLDS[run.w].lv;return Math.round(lo+(hi-lo)*(run.z+r/(MAPR+2))/ZONES)};
+const diffMul=(r=0)=>(1+.18*(run.star-1))*(1+.035*(run.w*ZONES+run.z+r/(MAPR+2)))*(run.w===0&&run.z<2?.65+.2*run.z:1);
 function starterKit(h,L,w){if(w===0)return;const t=tierOf(w,0);Object.keys(SLOTS).forEach(s=>{const it=genItem({L,tier:t,r:1,slot:s,set:VAG});addInv(it);equip(h,it)})}
 
 function startRun(classes){
@@ -3363,7 +3365,7 @@ function afterLoot(){const k=run.loot.kind;run.loot=null;
   if(k==='boss'){
     if(run.z>=ZONES-1){winRun();return}
     run.z++;run.rows=run.daily?withSeed(run.daily.seed+run.z*977,genMap):genMap();run.pos={r:0,i:0};run.visited=['0:0'];run.alphaB=Math.max(0,run.alphaB);
-    const Z=WORLDS[run.w].zones[run.z];run.msg={icon:Z[1],title:Z[0],text:`Zone ${run.z+1} sur ${ZONES}. Niveau des monstres : ${zoneLevel(0)}–${zoneLevel(7)}. Le donjon t'attend au bout de la carte.`};run.phase='msg'}
+    const Z=WORLDS[run.w].zones[run.z];run.msg={icon:Z[1],title:Z[0],text:`Zone ${run.z+1} sur ${ZONES}. Niveau des monstres : ${zoneLevel(0)}–${zoneLevel(MAPR+1)}. Le donjon t'attend au bout de la carte.`};run.phase='msg'}
   else run.phase='map';
   saveRun();render()}
 function winRun(){dailyEnd(true);const W=meta.worlds[run.w];W.wins++;W.bestStar=Math.max(W.bestStar||0,run.star);if(run.heroes.length>=4)meta.cnt.win4=(meta.cnt.win4||0)+1;if(!run.daily)W.starMax=Math.max(W.starMax,Math.min(5,run.star+1));meta.cnt.bestStarWin=Math.max(meta.cnt.bestStarWin,run.star);meta.cnt.runsEnded++;
@@ -3452,7 +3454,7 @@ function mapDeco(H,rows,y){let s=hashRes(run.w+'-'+run.z+'-deco');const rnd=()=>
     else o+=`<circle cx="${x.toFixed(0)}" cy="${yy.toFixed(0)}" r="2" fill="${ink}" opacity=".35"/><circle cx="${(x+6).toFixed(0)}" cy="${(yy+3).toFixed(0)}" r="1.4" fill="${ink}" opacity=".3"/>`}
   return o}
 function vMap(){
-  const rows=run.rows,rowH=88,top=120,H=top+(rows.length-1)*rowH+70,y=r=>top+r*rowH,cur=run.pos;
+  const rows=run.rows,rowH=80,top=120,H=top+(rows.length-1)*rowH+70,y=r=>top+r*rowH,cur=run.pos;
   const avail=cur.r<rows.length-1?rows[cur.r][cur.i].l:[];
   let lines='';rows.forEach((row,r)=>row.forEach((nd,i)=>nd.l.forEach(j=>{const b=rows[r+1][j];const a1=run.visited.indexOf(r+':'+i),a2=run.visited.indexOf((r+1)+':'+j);const walked=a1>=0&&a2===a1+1;const open=r===cur.r&&i===cur.i;const y1=y(r),y2=y(r+1),ym=(y1+y2)/2;
     lines+=`<path d="M${nd.x} ${y1}C${nd.x} ${ym} ${b.x} ${ym} ${b.x} ${y2}" class="${walked?'walked':open?'open':''}" vector-effect="non-scaling-stroke"/>`})));
@@ -3464,7 +3466,7 @@ function vMap(){
     info=`<div class="nodeinfo"><span class="node t-${nd.t}">${ico(nd.t)}</span><div class="meta"><b>${N.n}${mod?` · ${mod.n}`:''}</b><small>${d}</small></div><button class="btn main sm" data-a="go" data-v="${ui.mapSel}">Y aller</button></div>`}
   return`${runBar()}${runTools()}${teamPanel()}
   <div class="mapwrap parch" style="height:${H}px">${scene(run.w,'top')}${ROSE}<svg class="mapdeco" style="height:${H}px" viewBox="0 0 390 ${H}" preserveAspectRatio="none" aria-hidden="true">${mapDeco(H,rows,y)}</svg><svg class="mapsvg" style="height:${H}px" viewBox="0 0 100 ${H}" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>${nodes}<span class="mtitle">${zoneTitle()}</span></div>
-  ${info||`<p class="maphint"><span>Touche une case qui scintille pour voir ce qu'elle contient.</span><span>Niveau ${zoneLevel(0)}–${zoneLevel(7)}</span><span>Alphas ${alphaChance()} %</span></p>`}`}
+  ${info||`<p class="maphint"><span>Touche une case qui scintille pour voir ce qu'elle contient.</span><span>Niveau ${zoneLevel(0)}–${zoneLevel(MAPR+1)}</span><span>Alphas ${alphaChance()} %</span></p>`}`}
 
 /* ---------- Combat ---------- */
 function resChips(u){const l=EL.filter(e=>u.res[e]);if(!l.length)return'';return`<span class="chip res">${l.map(e=>`<span class="${u.res[e]<0?'neg':''}">${elIco(e)}${u.res[e]>0?'+':''}${u.res[e]}</span>`).join('')}</span>`}
@@ -3764,7 +3766,7 @@ function dailyCfg(){const key=todayKey();const s=hashRes('daily-'+key);const rnd
 function shuffleR(a,rnd){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function startDaily(){const D=dailyCfg();ui.world=D.w;ui.star=D.star;startRun(D.cls);run.daily={key:D.key,seed:D.seed,mod:D.mod,kills:0};
   run.rows=withSeed(D.seed+run.z*977,genMap);meta.daily=meta.daily||{};const R=meta.daily[D.key]=meta.daily[D.key]||{best:0,tries:0};R.tries++;saveMeta();saveRun()}
-function dailyScore(win){const d=run.daily;return(run.z*8+run.pos.r)*100+(d.kills||0)*10+Math.round(run.gold/10)+(win?3000:0)}
+function dailyScore(win){const d=run.daily;return(run.z*(MAPR+2)+run.pos.r)*50+(d.kills||0)*10+Math.round(run.gold/10)+(win?3000:0)}
 function dailyEnd(win){if(!run||!run.daily||run.daily.scored)return;const sc=dailyScore(win);run.daily.score=sc;run.daily.scored=1;const R=meta.daily[run.daily.key]=meta.daily[run.daily.key]||{best:0,tries:1};run.daily.prev=R.best;R.best=Math.max(R.best,sc);saveMeta()}
 
 /* ================= Save export / import ================= */

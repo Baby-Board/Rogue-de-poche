@@ -80,16 +80,18 @@ function unequip(h,slot){const it=h.eq[slot];if(!it)return;const before=maxHp(h)
 function findItem(id){let it=run.inv.find(x=>x.id===id);if(it)return{it,where:'inv'};for(const h of run.heroes)for(const s in h.eq)if(h.eq[s]&&h.eq[s].id===id)return{it:h.eq[s],where:h};return null}
 
 /* ================= Map ================= */
-function nodeType(r){if(r===1)return'fight';const w=[['fight',40],['hard',r>=2?16:0],['taverne',9],['sanct',6],['portal',8],['shop',7],['forge',6],['event',12]];let x=Math.random()*w.reduce((s,v)=>s+v[1],0);for(const [k,v] of w){if((x-=v)<0)return k}return'fight'}
+const MAPR=12;
+function nodeType(r){if(r<=2)return'fight';const w=[['fight',52],['hard',14],['taverne',5],['sanct',4],['portal',5],['shop',6],['forge',5],['event',9]];let x=Math.random()*w.reduce((s,v)=>s+v[1],0);for(const [k,v] of w){if((x-=v)<0)return k}return'fight'}
 function genMap(){const rows=[[{t:'start',l:[]}]];
-  for(let r=1;r<=6;r++){const n=R(2,4),row=[];for(let i=0;i<n;i++)row.push({t:nodeType(r),l:[]});if((r===3||r===6)&&!row.some(n=>n.t==='taverne'))row[R(0,n-1)].t='taverne';rows.push(row)}
+  const force={4:'taverne',6:'shop',8:'taverne',10:'forge',12:'taverne'};
+  for(let r=1;r<=MAPR;r++){const n=R(2,3)+(Math.random()<.2?1:0),row=[];for(let i=0;i<n;i++)row.push({t:nodeType(r),l:[]});const f=force[r];if(f&&!row.some(n=>n.t===f))row[R(0,n-1)].t=f;rows.push(row)}
   rows.push([{t:'boss',l:[]}]);
   rows.forEach(row=>row.forEach((nd,i)=>{nd.x=clamp(Math.round((i+1)/(row.length+1)*100+(row.length>1?R(-5,5):0)),10,90);if(nd.t==='hard')nd.mod=pick(MODS).k}));
   for(let r=0;r<rows.length-1;r++){const A=rows[r],B=rows[r+1];A.forEach((nd,i)=>{if(A.length===1){nd.l=B.map((_,k)=>k);return}if(B.length===1){nd.l=[0];return}const j=Math.round(i*(B.length-1)/(A.length-1));nd.l=[j];if(Math.random()<.45){const j2=j+(Math.random()<.5?-1:1);if(j2>=0&&j2<B.length)nd.l.push(j2)}});
     B.forEach((nd,j)=>{if(!A.some(a=>a.l.includes(j))){let best=0,bd=1e9;A.forEach((a,i)=>{const d=Math.abs(a.x-nd.x);if(d<bd){bd=d;best=i}});A[best].l.push(j)}})}
   return rows}
-const zoneLevel=(r=0)=>{const [lo,hi]=WORLDS[run.w].lv;return Math.round(lo+(hi-lo)*(run.z+r/8)/ZONES)};
-const diffMul=(r=0)=>(1+.18*(run.star-1))*(1+.035*(run.w*ZONES+run.z+r/8))*(run.w===0&&run.z<2?.65+.2*run.z:1);
+const zoneLevel=(r=0)=>{const [lo,hi]=WORLDS[run.w].lv;return Math.round(lo+(hi-lo)*(run.z+r/(MAPR+2))/ZONES)};
+const diffMul=(r=0)=>(1+.18*(run.star-1))*(1+.035*(run.w*ZONES+run.z+r/(MAPR+2)))*(run.w===0&&run.z<2?.65+.2*run.z:1);
 function starterKit(h,L,w){if(w===0)return;const t=tierOf(w,0);Object.keys(SLOTS).forEach(s=>{const it=genItem({L,tier:t,r:1,slot:s,set:VAG});addInv(it);equip(h,it)})}
 
 function startRun(classes){
@@ -373,7 +375,7 @@ function afterLoot(){const k=run.loot.kind;run.loot=null;
   if(k==='boss'){
     if(run.z>=ZONES-1){winRun();return}
     run.z++;run.rows=run.daily?withSeed(run.daily.seed+run.z*977,genMap):genMap();run.pos={r:0,i:0};run.visited=['0:0'];run.alphaB=Math.max(0,run.alphaB);
-    const Z=WORLDS[run.w].zones[run.z];run.msg={icon:Z[1],title:Z[0],text:`Zone ${run.z+1} sur ${ZONES}. Niveau des monstres : ${zoneLevel(0)}–${zoneLevel(7)}. Le donjon t'attend au bout de la carte.`};run.phase='msg'}
+    const Z=WORLDS[run.w].zones[run.z];run.msg={icon:Z[1],title:Z[0],text:`Zone ${run.z+1} sur ${ZONES}. Niveau des monstres : ${zoneLevel(0)}–${zoneLevel(MAPR+1)}. Le donjon t'attend au bout de la carte.`};run.phase='msg'}
   else run.phase='map';
   saveRun();render()}
 function winRun(){dailyEnd(true);const W=meta.worlds[run.w];W.wins++;W.bestStar=Math.max(W.bestStar||0,run.star);if(run.heroes.length>=4)meta.cnt.win4=(meta.cnt.win4||0)+1;if(!run.daily)W.starMax=Math.max(W.starMax,Math.min(5,run.star+1));meta.cnt.bestStarWin=Math.max(meta.cnt.bestStarWin,run.star);meta.cnt.runsEnded++;
