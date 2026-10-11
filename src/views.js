@@ -37,8 +37,8 @@ function vHome(){
   const nT=Object.keys(meta.talis).length,nR=Object.keys(meta.relics).filter(k=>RELART[k]).length,nA=Object.keys(meta.alphas).length,nQ=Object.keys(meta.quests).filter(q=>QUESTS[q]).length;
   const ownT=TALIS.filter(t=>meta.talis[t.id]).map(t=>t.id),ownR=Object.keys(meta.relics).filter(k=>RELART[k]);
   const fan=(arr,cls)=>`<span class="fan ${cls}">${arr.slice(-3).map((h,i,a)=>`<span style="--k:${i-(a.length-1)/2}">${h}</span>`).join('')}</span>`;
-  const tal=ownT.length?fan(ownT.map(k=>TALART[k]),''):fan([TALART.mousse],'ghost');
-  const rel=ownR.length?fan(ownR.map(k=>RELART[k]),''):fan([RELART['0_0']],'ghost');
+  const tal=ownT.length?fan(ownT.map(k=>TALART[k]),''):fan([TALART.lune,TALART.mousse,TALART.braise],'ghost');
+  const rel=ownR.length?fan(ownR.map(k=>RELART[k]),''):fan([RELART['0_1'],RELART['0_0'],RELART['0_3']],'ghost');
   const alph=Object.keys(meta.alphas).slice(-3).map(k=>{const [w,i]=k.split('_').map(Number);const r=WORLDS[w]&&WORLDS[w].roster[i];return r?PORTRAIT[r[0]]:''}).filter(Boolean);
   const best=fan(alph.length?alph:[PORTRAIT[WORLDS[0].roster[0][0]]],alph.length?'round':'round ghost');
   const tiles=[['talis','Talismans',`${nT} / ${TALIS.length}`,tal],['relics','Reliques',`${nR} / ${WORLDS.length*ZONES}`,rel],['best','Bestiaire',`${nA} alphas`,best],

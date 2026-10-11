@@ -48,7 +48,7 @@ const ICO={
   cape:'<path d="M8 3.5h8l1.6 3.4L21 20.5c-3 .9-6 1-9 1s-6-.1-9-1L6.4 6.9z" fill="currentColor"/><path d="M8 3.5h8l-1.2 3.2H9.2z" fill="#e5ae4c"/><path d="M12 7v13.6" stroke="#00000035" stroke-width="1.4"/>',
   anneau:'<circle cx="12" cy="14.5" r="6.2" fill="none" stroke="#e5ae4c" stroke-width="2.6"/><path d="M9 4.5h6l1.6 2.4L12 10 7.4 6.9z" fill="#7ee8cf"/>',
 };
-const ico=(k,cls='')=>svg(ICO[k],cls);
+const ico=(k,cls='')=>(typeof PICO!=='undefined'&&PICO['ui_'+k])?`<img class="ic icimg ${cls}" src="${PICO['ui_'+k]}" alt="" draggable="false">`:svg(ICO[k],cls);
 
 /* --- class medallions --- */
 const EMB={
