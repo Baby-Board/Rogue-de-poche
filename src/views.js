@@ -40,9 +40,9 @@ function vHome(){
   const tal=ownT.length?fan(ownT.map(k=>TALART[k]),''):fan([TALART.lune,TALART.mousse,TALART.braise],'ghost');
   const rel=ownR.length?fan(ownR.map(k=>RELART[k]),''):fan([RELART['0_1'],RELART['0_0'],RELART['0_3']],'ghost');
   const alph=Object.keys(meta.alphas).slice(-3).map(k=>{const [w,i]=k.split('_').map(Number);const r=WORLDS[w]&&WORLDS[w].roster[i];return r?PORTRAIT[r[0]]:''}).filter(Boolean);
-  const best=fan(alph.length?alph:[PORTRAIT[WORLDS[0].roster[0][0]]],alph.length?'round':'round ghost');
+  const best=fan(alph.length?alph:[WORLDS[0].roster[6][0],WORLDS[0].roster[0][0],WORLDS[0].roster[2][0]].map(n=>PORTRAIT[n]),alph.length?'round':'round ghost');
   const tiles=[['talis','Talismans',`${nT} / ${TALIS.length}`,tal],['relics','Reliques',`${nR} / ${WORLDS.length*ZONES}`,rel],['best','Bestiaire',`${nA} alphas`,best],
-    ['enc','Classes',`${ORDER.length} classes`,fan(['lame','passeuse','rempart'].map(c=>classMed(c)),'round')],['quests','Succès',`${nQ} / ${Object.keys(QUESTS).length}`,`<span class="tico">${ico('trophy')}</span>`],['rules','Règles','Comment jouer',`<span class="tico">${ico('scroll')}</span>`]];
+    ['enc','Classes',`${ORDER.length} classes`,fan(['lame','passeuse','rempart'].map(c=>classMed(c)),'round')],['quests','Succès',`${nQ} / ${Object.keys(QUESTS).length}`,fan([ico('medal'),ico('trophy'),ico('chest')],'icf')],['rules','Règles','Comment jouer',fan([ico('book'),ico('scroll'),ico('stats')],'icf')]];
   return`<div class="home2">
   <header class="hero2">${scene(wsel)}<div class="hero2-in"><h1 class="gilt">Rogue de Poche</h1><p>Deux rangées, quatre éléments, cinq mondes.</p></div></header>
   <section class="wsel" aria-label="Mondes">${WORLDS.map((Wd,i)=>{const Mi=meta.worlds[i],lock=i>=meta.unlocked,sel=i===wsel;const al=Wd.roster.filter((_,k)=>meta.alphas[i+'_'+k]).length,rl=Wd.zones.filter((_,z)=>meta.relics[i+'_'+z]).length;
