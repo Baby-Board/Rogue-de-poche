@@ -7,6 +7,7 @@ const A={
   start:()=>{if(ui.pick.length!==2)return;startRun(ui.pick);ui.screen='run';render()},
   continue:()=>{ui.screen='run';ui.confirm=null;render();resume()},
   home:()=>{ui.screen='home';ui.modal=null;ui.confirm=null;clearTimeout(timer);busy=false;render()},
+  menuabandon:()=>{ui.modal=null;ui.screen='home';ui.confirm='abandon';render()},
   confirm:v=>{ui.confirm=v||null;render()},
   abandon:()=>{clearTimeout(timer);busy=false;meta.cnt.runsEnded++;run.phase='end';updateZoneMax();checkQuests();saveMeta();run=null;saveRun();ui.confirm=null;render()},
   endok:()=>{run=null;saveRun();ui.screen='home';ui.star=meta.worlds[ui.world].starMax;render()},

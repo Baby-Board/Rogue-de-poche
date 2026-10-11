@@ -6,11 +6,17 @@ from PIL import Image
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));S=os.path.join(R,'src')
 # 1. portraits peints -> paint.js
 paint={}
+# recadrage des héros : carré centré sur le visage (coordonnées sur 256 px)
+HCROP={'cls_archere':(23,5,193,175),'cls_artificier':(27,5,197,175),'cls_assassin':(40,5,210,175),'cls_chrono':(43,5,213,175),
+ 'cls_flambeur':(35,10,205,180),'cls_lame':(27,5,197,175),'cls_lancier':(25,5,195,175),'cls_passeuse':(94,24,254,184),
+ 'cls_rempart':(43,0,213,170),'cls_soigneuse':(27,0,197,170),'cls_traqueur':(28,35,228,235)}
 d=os.path.join(R,'art','portraits')
 for f in sorted(os.listdir(d)):
     if not f.endswith('.jpg'):continue
     im=Image.open(os.path.join(d,f)).convert('RGB')
     if max(im.size)>256:im=im.resize((256,256),Image.LANCZOS)
+    k=f[:-4]
+    if k in HCROP:im=im.crop(HCROP[k])
     b=io.BytesIO();im.save(b,'WEBP',quality=82,method=6)
     paint[f[:-4]]='data:image/webp;base64,'+base64.b64encode(b.getvalue()).decode()
 ban={}
