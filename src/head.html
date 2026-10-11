@@ -808,6 +808,11 @@ textarea.code{width:100%;font:12px/1.3 ui-monospace,monospace;color:var(--ink);b
 .pban img.bimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 img.scene{object-fit:cover;display:block}
 .runcard{position:relative}.rc-x{display:inline-block;margin-top:7px;font:800 12px/1 var(--f-body);color:#f2a493;background:rgba(60,14,10,.55);border:1px solid #8a3a2c;border-radius:99px;padding:6px 10px}
+.wc{height:auto;display:flex;flex-direction:column}
+.wc-art{position:relative;inset:auto;display:block;width:100%;aspect-ratio:16/9;flex:none}.wc-art .scene{width:100%;height:100%;display:block;object-fit:cover}
+.wc::after{display:none}.wc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,16,18,0) 70%,rgba(13,26,27,.9) 100%)}
+.wc-txt{position:relative;left:auto;right:auto;bottom:auto;padding:8px 12px 12px;margin-top:-6px}
+.wc-txt b{font-size:22px}
 /* ---- juice : couche d'effets de combat ---- */
 @property --p{syntax:'<number>';inherits:true;initial-value:100}
 @property --lag{syntax:'<number>';inherits:true;initial-value:0}

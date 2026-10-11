@@ -25,7 +25,7 @@ if os.path.isdir(bd):
     for f in sorted(os.listdir(bd)):
         if not f.lower().endswith(('.jpg','.png','.webp')):continue
         im=Image.open(os.path.join(bd,f)).convert('RGB')
-        W=960;H=round(W*4/9)
+        W=960;H=round(W*9/16) if f.startswith('monde') else round(W*4/9)
         r=max(W/im.width,H/im.height);im=im.resize((round(im.width*r),round(im.height*r)),Image.LANCZOS)
         x=(im.width-W)//2;y=(im.height-H)//2;im=im.crop((x,y,x+W,y+H))
         b=io.BytesIO();im.save(b,'WEBP',quality=78,method=6)
