@@ -179,7 +179,7 @@ const emblem=(k,red)=>`<span class="emblem ${red?'red':''}">${ico(k)}</span>`;
 function relicDrop(R){if(!R)return'';const [w,z]=R.k.split('_').map(Number);
   if(R.got)return`<div class="reldrop"><span class="rshine"></span><i class="rart">${RELART[R.k]||RELIC[z][0]}</i><div><small>Relique trouvée</small><b>${relicName(w,z)}</b><em>${relicTxt(w,z)} pour toute l’équipe</em><span>Ajoutée à ta collection, active à chaque run.</span></div></div>`;
   return`<div class="reldrop off"><i>${ico('relic')}</i><div><small>Relique de la zone</small><b>${R.had?relicName(w,z):'Pas cette fois'}</b><span>${R.had?'Déjà dans ta collection.':'Le boss peut encore la lâcher lors d’une prochaine visite. La prospection augmente les chances.'}</span></div></div>`}
-const placeBan=k=>PLACE[k]?`<div class="pban">${PLACE[k]}</div>`:'';
+const placeBan=k=>BAN[k]?`<div class="pban"><img class="bimg" src="${BAN[k]}" alt="" draggable="false"></div>`:PLACE[k]?`<div class="pban">${PLACE[k]}</div>`:'';
 function vLoot(){const L=run.loot;const boss=L.kind==='boss';return`${runBar()}<div class="screen">${placeBan(boss?'boss':'loot')}<div class="head ph">${emblem(boss?'boss':'chest')}<div><h2 class="gilt">${boss?'Donjon vaincu':'Butin !'}</h2><small>${boss?WORLDS[run.w].zones[run.z][2][0]:L.kind==='hard'?'Combat dur remporté':'Victoire'}</small></div></div>
   ${relicDrop(L.relic)}
   <div class="lines">${L.lines.map(l=>`<div>${l}</div>`).join('')}</div>

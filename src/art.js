@@ -68,7 +68,7 @@ function classMed(cls){const c=CLASSES[cls];const [a,b]=c.els.map(e=>ELD[e]);
   return`<svg class="med" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><defs><linearGradient id="cg-${cls}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient><radialGradient id="cgl" cx=".32" cy=".26" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><circle cx="24" cy="24" r="23" fill="url(#cg-${cls})"/><circle cx="24" cy="24" r="23" fill="url(#cgl)"/><circle cx="24" cy="24" r="20.6" fill="none" stroke="#000" stroke-opacity=".28"/><g transform="translate(9 9) scale(1.25)">${EMB[cls]}</g></svg>`}
 
 /* --- world scenes --- */
-function scene(w,cls=''){
+function scene(w,cls=''){if(typeof BAN!=='undefined'&&BAN['monde'+(w+1)])return`<img class="scene ${cls}" src="${BAN['monde'+(w+1)]}" alt="" aria-hidden="true" draggable="false">`;
   const S=[
 `<defs><linearGradient id="sk0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f3355"/><stop offset=".5" stop-color="#c9805a"/><stop offset="1" stop-color="#f3c47c"/></linearGradient></defs>
 <rect width="360" height="160" fill="url(#sk0)"/><circle cx="256" cy="92" r="30" fill="#ffe7ad" opacity=".9"/><circle cx="256" cy="92" r="46" fill="#ffe7ad" opacity=".14"/>

@@ -13,7 +13,18 @@ for f in sorted(os.listdir(d)):
     if max(im.size)>256:im=im.resize((256,256),Image.LANCZOS)
     b=io.BytesIO();im.save(b,'WEBP',quality=82,method=6)
     paint[f[:-4]]='data:image/webp;base64,'+base64.b64encode(b.getvalue()).decode()
-pj='/* Portraits peints (générés, originaux) — produit par make.py */\nconst PAINT='+json.dumps(paint,ensure_ascii=False)+';\n'
+ban={}
+bd=os.path.join(R,'art','banners')
+if os.path.isdir(bd):
+    for f in sorted(os.listdir(bd)):
+        if not f.lower().endswith(('.jpg','.png','.webp')):continue
+        im=Image.open(os.path.join(bd,f)).convert('RGB')
+        W=960;H=round(W*4/9)
+        r=max(W/im.width,H/im.height);im=im.resize((round(im.width*r),round(im.height*r)),Image.LANCZOS)
+        x=(im.width-W)//2;y=(im.height-H)//2;im=im.crop((x,y,x+W,y+H))
+        b=io.BytesIO();im.save(b,'WEBP',quality=78,method=6)
+        ban[os.path.splitext(f)[0]]='data:image/webp;base64,'+base64.b64encode(b.getvalue()).decode()
+pj='/* Portraits peints (générés, originaux) — produit par make.py */\nconst PAINT='+json.dumps(paint,ensure_ascii=False)+';\nconst BAN='+json.dumps(ban,ensure_ascii=False)+';\n'
 pj+='for(const n in PAINT){if(n.startsWith("cls_"))continue;PORTRAIT[n]=`<img class="pimg" src="${PAINT[n]}" alt="" draggable="false">`}\n'
 pj+='{const _cm=classMed;classMed=function(c){const k=PAINT["cls_"+c];return k?`<span class="pmed"><img class="pimg" src="${k}" alt="" draggable="false"></span>`:_cm(c)}}\n'
 open(os.path.join(S,'paint.js'),'w',encoding='utf8').write(pj)
@@ -29,4 +40,4 @@ sw='<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigato
 open(os.path.join(R,'index.html'),'w',encoding='utf8').write(pre+html.replace('</title>','</title>'+head,1)+sw)
 if '--out' in sys.argv:open(sys.argv[sys.argv.index('--out')+1],'w',encoding='utf8').write(html)
 p=os.path.join(R,'sw.js');t=open(p).read();n=int(re.search(r"rdp-v(\d+)",t).group(1))+1;open(p,'w').write(re.sub(r"rdp-v\d+","rdp-v%d"%n,t))
-print('OK',len(paint),'portraits, cache v%d'%n)
+print('OK',len(paint),'portraits,',len(ban),'bannières, cache v%d'%n)
