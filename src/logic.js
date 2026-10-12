@@ -4,7 +4,7 @@ const CNT0={runs:0,runsEnded:0,wins:0,hardWins:0,flawless:0,bossKills:0,maxHit:0
 function freshMeta(){return{unlocked:1,worlds:WORLDS.map(()=>({starMax:1,zoneMax:0,wins:0,runs:0})),alphas:{},relics:{},talis:{},quests:{},armory:{},cnt:{...CNT0}}}
 let meta=store.get(META_KEY,null)||freshMeta();
 meta.cnt=Object.assign({...CNT0},meta.cnt);
-let run=store.get(RUN_KEY,null);
+let run=store.get(RUN_KEY,null);if(run&&run.heroes)run.heroes.forEach(h=>{if(CLASSES[h.cls])h.name=CLASSES[h.cls].n});
 /* migrate: relics used to be equippable items */
 if(run){const isR=x=>x&&(x.relic||x.set==='relic');(run.inv||[]).filter(isR).forEach(x=>{if(x.relic)meta.relics[x.relic]=1});run.inv=(run.inv||[]).filter(x=>!isR(x));(run.heroes||[]).forEach(h=>{for(const s in h.eq)if(isR(h.eq[s])){meta.relics[h.eq[s].relic]=1;h.eq[s]=null}});if(run.loot)run.loot.items=(run.loot.items||[]).filter(x=>!isR(x));store.set(RUN_KEY,run);store.set(META_KEY,meta)}
 let ui={screen:'home',world:0,star:1,sel:null,modal:null,confirm:null,pick:[],lastScreen:null,mapSel:null,invHero:0,itemId:null,inspect:null,encCls:'lame',bestW:0,bestZ:null,questT:null,form:null,shopTab:'buy',invSort:'tier'};
