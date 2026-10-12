@@ -44,7 +44,7 @@ const A={
   invsort:v=>{ui.invSort=v;render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
   unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
-  sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`Vendu : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()},
+  sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`${f.it.name} vendu : +${fmt(p)} écus`);checkQuests();saveMeta();saveRun();render()},
   forge:id=>{const f=findItem(id);if(!f||f.it.r>=FORGE_MAX)return;const c=forgeCost(f.it);if(run.gold<c)return;const h=f.where!=='inv'?f.where:null;const before=h?maxHp(h):0;run.gold-=c;meta.cnt.spent+=c;forgeItem(f.it);if(h&&h.alive)h.hp=clamp(h.hp+maxHp(h)-before,1,maxHp(h));toast(`${f.it.name} devient ${RAR[f.it.r].l} !`);checkQuests();saveMeta();saveRun();render()},
   drink:id=>{const h=run.heroes.find(x=>x.id===id);if(!h||!h.alive||!run.potions||run.phase==='combat')return;run.potions--;healPct(h,.35);meta.cnt.potions++;checkQuests();saveMeta();saveRun();render()},
   formslot:v=>{const [row,i]=v.split(':');const s=+i;const occ=run.heroes.find(x=>x.row===row&&x.slot===s);

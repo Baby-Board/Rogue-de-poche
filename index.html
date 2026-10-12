@@ -828,6 +828,7 @@ img.scene{object-fit:cover;display:block}
 .fan.round>span .icoimg{border-radius:50%;-webkit-mask:none;mask:none;transform:scale(1.12)}
 .tico{width:52px;height:52px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45,0 4px 8px rgba(0,0,0,.6);background:#1a1110}
 .tico .ic.icimg{width:100%!important;height:100%!important;transform:scale(.88);-webkit-mask:none;mask:none;border-radius:50%}
+.sortbar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 /* ---- juice : couche d'effets de combat ---- */
 @property --p{syntax:'<number>';inherits:true;initial-value:100}
 @property --lag{syntax:'<number>';inherits:true;initial-value:0}
@@ -3044,13 +3045,15 @@ function checkSets(){run.heroes.forEach(h=>{if(hstats(h).setPA)meta.cnt.setDone=
 
 /* ================= Items ================= */
 const tierOf=(w,z)=>w*ZONES+z+1;
+/* niveau fixe d'un palier : milieu de la zone → même objet + même rareté = même Adapt. */
+const tierLevel=t=>{const w=Math.min(WORLDS.length-1,Math.floor((t-1)/ZONES)),z=(t-1)%ZONES,[lo,hi]=WORLDS[w].lv;return Math.round(lo+(hi-lo)*(z+.5)/ZONES)};
 function setOf(w,z){const b=WORLDS[w].zones[z][2][0];return{k:w+'_'+z,n:'Panoplie '+de(b),sfx:de(b)}}
 const VAG={k:'vag',n:'Panoplie du Vagabond',sfx:'du Vagabond'};
 const POOLS={arme:['crit','vita','pui','pp'],coiffe:['vita','pp','res','init','res'],cape:['vita','pp','crit','res','soin'],anneau:['crit','vita','pui','res','init']};
 function affix(k,L,rm,taken){if(k==='res'){const e=shuffle(EL).find(x=>!taken.includes('r'+x));return['r'+e,Math.max(1,Math.round((R(1,3)+L/50)*rm))]}
   const v={vita:(4+L*.6)*rm,crit:R(1,2)*rm+L/60,pp:(3+L*.12)*rm,pui:(2+L*.12)*rm,soin:(3+L*.15)*rm,init:(2+L*.05)*rm}[k];return[k,Math.max(1,Math.round(v))]}
 function genItem(o){
-  const slot=o.slot||pick(Object.keys(SLOTS)),r=o.r,rm=RAR[r].m,L=o.L,set=o.set||VAG;
+  const slot=o.slot||pick(Object.keys(SLOTS)),r=o.r,rm=RAR[r].m,L=o.tier?tierLevel(o.tier):o.L,set=o.set||VAG;
   const st={adapt:Math.max(1,Math.round((2+L*.35)*rm))};
   shuffle(POOLS[slot]).forEach(k=>{if(Object.keys(st).length>=RAR[r].n)return;if(k!=='res'&&st[k])return;const [kk,v]=affix(k,L,rm,Object.keys(st));st[kk]=v});if(r===5&&Math.random()<.4)st.pa=1;
   const it={id:'i'+(run.uid++),slot,r,st,set:set.k,setN:set.n,tier:o.tier,L,name:(slot==='arme'?spick(WBASE,set.k+'w'):spick(IBASE[slot],set.k+slot))+' '+set.sfx};
@@ -3559,7 +3562,7 @@ const placeBan=k=>BAN[k]?`<div class="pban"><img class="bimg" src="${BAN[k]}" al
 function vLoot(){const L=run.loot;const boss=L.kind==='boss';return`${runBar()}<div class="screen">${placeBan(boss?'boss':'loot')}<div class="head ph">${emblem(boss?'boss':'chest')}<div><h2 class="gilt">${boss?'Donjon vaincu':'Butin !'}</h2><small>${boss?WORLDS[run.w].zones[run.z][2][0]:L.kind==='hard'?'Combat dur remporté':'Victoire'}</small></div></div>
   ${relicDrop(L.relic)}
   <div class="lines">${L.lines.map(l=>`<div>${l}</div>`).join('')}</div>
-  ${L.items.length?`<span class="lab">${L.items.length} pièce${L.items.length>1?'s':''} d'équipement</span><div class="stack loot">${L.items.map(it=>itemBtn(it)).join('')}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le comparer et l'équiper. Tout est rangé dans le sac.</p>`:'<p class="mute" style="margin:0">Aucun objet cette fois. La prospection augmente les chances de butin.</p>'}
+  ${L.items.length?`<span class="lab">${L.items.length} pièce${L.items.length>1?'s':''} d'équipement</span><div class="stack loot">${L.items.filter(it=>run.inv.some(x=>x.id===it.id)).map(it=>itemBtn(it)).join('')||'<p class="mute" style="margin:0">Tout est équipé.</p>'}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le comparer et l'équiper. Tout est rangé dans le sac.</p>`:'<p class="mute" style="margin:0">Aucun objet cette fois. La prospection augmente les chances de butin.</p>'}
   <div class="dock"><div><button class="btn main" data-a="lootok">Continuer</button></div></div></div>`}
 function vTaverne(){const t=run.tav,full=run.heroes.length>=4;return`${runBar()}<div class="screen">${placeBan('taverne')}<div class="head ph">${emblem('taverne')}<div><h2 class="gilt">Taverne</h2><small>Un feu, une soupe, des rumeurs</small></div></div>
   ${t.done?`<p class="txt">${t.done}</p>`:`<p class="txt">Une seule chose avant de repartir.</p>
@@ -3569,7 +3572,7 @@ function vTaverne(){const t=run.tav,full=run.heroes.length>=4;return`${runBar()}
 function vShop(){const s=run.shop;const tab=ui.shopTab;const greens=run.inv.filter(x=>x.r===0);return`${runBar()}<div class="screen">${placeBan('shop')}<div class="head ph">${emblem('shop')}<div><h2 class="gilt">Comptoir</h2><small>Tout est d'occasion, rien n'est maudit</small></div></div>
   <div class="tabs"><button class="tab ${tab==='buy'?'on':''}" data-a="shoptab" data-v="buy">Acheter</button><button class="tab ${tab==='sell'?'on':''}" data-a="shoptab" data-v="sell">Vendre (${run.inv.length})</button></div>
   ${tab==='buy'?`<div class="stack">${s.items.map((x,i)=>`<button class="item ir${x.it.r} ${x.sold?'sold':''}" data-a="buy" data-v="${i}" ${x.sold||run.gold<x.price?'disabled':''}>${itemHTML(x.it,x.sold?'<span class="price">Vendu</span>':price(x.price))}</button>`).join('')}</div>`
-  :`${greens.length?`<button class="btn" data-a="sellgreen">Vendre tous les objets verts (${greens.length}) · ${coin()} ${fmt(greens.reduce((s,x)=>s+sellPrice(x),0))}</button>`:''}${run.inv.length?`<div class="stack">${sortedInv().map(it=>itemBtn(it,price(sellPrice(it)))).join('')}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le vendre. Les objets équipés ne sont pas listés.</p>`:'<p class="mute">Le sac est vide.</p>'}`}
+  :`${sortBar()}${greens.length?`<button class="btn" data-a="sellgreen">Vendre tous les objets verts (${greens.length}) · ${coin()} ${fmt(greens.reduce((s,x)=>s+sellPrice(x),0))}</button>`:''}${run.inv.length?`<div class="stack">${sortedInv().map(it=>`<button class="item ir${it.r}" data-a="sell" data-v="${it.id}">${itemHTML(it,price(sellPrice(it)))}</button>`).join('')}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le vendre aussitôt. Les objets équipés ne sont pas listés.</p>`:'<p class="mute">Le sac est vide.</p>'}`}
   <div class="dock"><div><button class="btn" data-a="leave">Repartir</button></div></div></div>`}
 function allItems(){const l=run.inv.slice();run.heroes.forEach(h=>Object.values(h.eq).forEach(x=>x&&l.push(x)));return l}
 function vForge(){const l=allItems().filter(x=>x.r<FORGE_MAX).sort((a,b)=>b.tier-a.tier||b.r-a.r);return`${runBar()}<div class="screen">${placeBan('forge')}<div class="head ph">${emblem('forge')}<div><h2 class="gilt">Forge</h2><small>L'enclume chante encore</small></div></div>
@@ -3584,7 +3587,8 @@ function vEnd(){const win=run.result==='win';return`<div class="endscr"><div cla
   ${run.daily?`<div class="daily end"><span class="dl-badge">Défi du jour</span><b class="dl-score">${fmt(run.daily.score||0)}</b><small>${(run.daily.score||0)>(run.daily.prev||0)?'Nouveau record du jour !':`Record du jour : ${fmt(run.daily.prev)}`}</small><small class="mute">Zone ${run.z+1} · ${run.daily.kills||0} monstres vaincus · ${fmt(run.gold)} écus</small></div>`:''}
   <p class="mute">Talismans, bestiaire, reliques et succès sont conservés.</p>
   <button class="btn main" data-a="endok">Retour à l'accueil</button></div>`}
-function sortedInv(){const l=run.inv.slice();const so=Object.keys(SLOTS);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
+function sortedInv(){const l=run.inv.slice();const so=Object.keys(SLOTS);if(ui.invSort==='set')return l.sort((a,b)=>(a.setN||'').localeCompare(b.setN||'')||so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
+const sortBar=()=>`<div class="sortbar">${[['tier','Palier'],['type','Type'],['set','Panoplie']].map(([k,l])=>`<button class="tab ${ui.invSort===k?'on':''}" data-a="invsort" data-v="${k}">${l}</button>`).join('')}</div>`;
 /* ================= Juice : animations de combat =================
    Le combat est redessiné en entier à chaque action. Les effets vivent donc :
    - dans une couche #fxl (projectiles, particules, chiffres, fantômes), indépendante du DOM du combat ;
@@ -3845,7 +3849,7 @@ function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h)
   <div class="chips"><span class="chip">PV max ${S.hp}</span><span class="chip" style="color:#bfe3ff">${S.pa} PA</span><span class="chip">Prosp. ${S.pp}</span></div>
   <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];return it?itemBtn(it,`<span class="slotlab">${SLOTS[s]}</span>`):`<div class="item" style="opacity:.55;border-style:dashed"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b></div></div>`}).join('')}</div>
   ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
-  <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span><button class="tab ${ui.invSort==='tier'?'on':''}" data-a="invsort" data-v="tier">Palier</button><button class="tab ${ui.invSort==='type'?'on':''}" data-a="invsort" data-v="type">Type</button></div>
+  <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span></div>${sortBar()}
   <div class="stack">${sortedInv().map(it=>itemBtn(it)).join('')||'<p class="mute">Le sac est vide.</p>'}</div>`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
   let diff='';if(f.where==='inv'){const keys=[...new Set(Object.keys(it.st).concat(cur?Object.keys(cur.st):[]))];diff=keys.map(k=>{const d=(it.st[k]||0)-(cur?cur.st[k]||0:0);return d?`<span class="chip ${d>0?'up':'dn'}">${d>0?'+':''}${d} ${STL[k]}</span>`:''}).join('')}
@@ -3933,7 +3937,7 @@ const A={
   invsort:v=>{ui.invSort=v;render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
   unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
-  sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`Vendu : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()},
+  sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`${f.it.name} vendu : +${fmt(p)} écus`);checkQuests();saveMeta();saveRun();render()},
   forge:id=>{const f=findItem(id);if(!f||f.it.r>=FORGE_MAX)return;const c=forgeCost(f.it);if(run.gold<c)return;const h=f.where!=='inv'?f.where:null;const before=h?maxHp(h):0;run.gold-=c;meta.cnt.spent+=c;forgeItem(f.it);if(h&&h.alive)h.hp=clamp(h.hp+maxHp(h)-before,1,maxHp(h));toast(`${f.it.name} devient ${RAR[f.it.r].l} !`);checkQuests();saveMeta();saveRun();render()},
   drink:id=>{const h=run.heroes.find(x=>x.id===id);if(!h||!h.alive||!run.potions||run.phase==='combat')return;run.potions--;healPct(h,.35);meta.cnt.potions++;checkQuests();saveMeta();saveRun();render()},
   formslot:v=>{const [row,i]=v.split(':');const s=+i;const occ=run.heroes.find(x=>x.row===row&&x.slot===s);

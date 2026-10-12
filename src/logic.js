@@ -50,13 +50,15 @@ function checkSets(){run.heroes.forEach(h=>{if(hstats(h).setPA)meta.cnt.setDone=
 
 /* ================= Items ================= */
 const tierOf=(w,z)=>w*ZONES+z+1;
+/* niveau fixe d'un palier : milieu de la zone → même objet + même rareté = même Adapt. */
+const tierLevel=t=>{const w=Math.min(WORLDS.length-1,Math.floor((t-1)/ZONES)),z=(t-1)%ZONES,[lo,hi]=WORLDS[w].lv;return Math.round(lo+(hi-lo)*(z+.5)/ZONES)};
 function setOf(w,z){const b=WORLDS[w].zones[z][2][0];return{k:w+'_'+z,n:'Panoplie '+de(b),sfx:de(b)}}
 const VAG={k:'vag',n:'Panoplie du Vagabond',sfx:'du Vagabond'};
 const POOLS={arme:['crit','vita','pui','pp'],coiffe:['vita','pp','res','init','res'],cape:['vita','pp','crit','res','soin'],anneau:['crit','vita','pui','res','init']};
 function affix(k,L,rm,taken){if(k==='res'){const e=shuffle(EL).find(x=>!taken.includes('r'+x));return['r'+e,Math.max(1,Math.round((R(1,3)+L/50)*rm))]}
   const v={vita:(4+L*.6)*rm,crit:R(1,2)*rm+L/60,pp:(3+L*.12)*rm,pui:(2+L*.12)*rm,soin:(3+L*.15)*rm,init:(2+L*.05)*rm}[k];return[k,Math.max(1,Math.round(v))]}
 function genItem(o){
-  const slot=o.slot||pick(Object.keys(SLOTS)),r=o.r,rm=RAR[r].m,L=o.L,set=o.set||VAG;
+  const slot=o.slot||pick(Object.keys(SLOTS)),r=o.r,rm=RAR[r].m,L=o.tier?tierLevel(o.tier):o.L,set=o.set||VAG;
   const st={adapt:Math.max(1,Math.round((2+L*.35)*rm))};
   shuffle(POOLS[slot]).forEach(k=>{if(Object.keys(st).length>=RAR[r].n)return;if(k!=='res'&&st[k])return;const [kk,v]=affix(k,L,rm,Object.keys(st));st[kk]=v});if(r===5&&Math.random()<.4)st.pa=1;
   const it={id:'i'+(run.uid++),slot,r,st,set:set.k,setN:set.n,tier:o.tier,L,name:(slot==='arme'?spick(WBASE,set.k+'w'):spick(IBASE[slot],set.k+slot))+' '+set.sfx};
