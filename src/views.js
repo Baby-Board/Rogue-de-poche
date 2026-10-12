@@ -124,7 +124,6 @@ const spellKind=s=>s.wpn?'wpn':s.heal?'k-heal':s.base?'k-dmg':'k-buf';
 function tokenOf(u,tg,size){const c=C(),isT=tg&&tg.includes(u),isCur=c&&c.cur===u.id,m=maxHp(u),p=u.alive?clamp(Math.round(u.hp/m*100),0,100):0,sh=u.st.shield||0;
   const face=u.side==='h'?classMed(u.cls):(portraitOf(u)||`<span class="em">${u.icon}</span>`);const pips=stChips(u);const mm=u.side==='e'&&/ ([A-F])$/.exec(u.name),nm=mm?u.name.slice(0,-2):u.name;
   return`<button class="tok ${u.side} ${size} ${u.alive?'':'ko'} ${isCur?'cur':''} ${isT?'tgt':''} ${u.boss?'boss':''} ${u.alpha?'alpha':''}" data-uid="${u.id}" data-a="${isT?'target':'inspect'}" data-v="${u.id}" style="--elc:${u.side==='e'?ELC[u.el]:'#c99a45'}" aria-label="${u.name}">
-   ${u.side==='e'&&u.alive?`<span class="intent">${intentText(u)}</span>`:''}
    <span class="ring" style="--p:${p};--lag:${p}">${sh&&u.alive?`<span class="shr" style="--q:${Math.min(100,Math.round(sh/m*100))}"></span>`:''}<span class="face">${face}</span>${u.side==='h'?`<span class="lv">${u.lvl}</span>`:mm?`<span class="lv tag">${mm[1]}</span>`:''}${u.alpha?'<span class="crown"></span>':''}</span>
    <span class="plate"><b>${nm}</b><em>${u.alive?`${u.hp} / ${m}${sh?` · 🛡${sh}`:''}`:'K.O.'}</em></span>
    ${pips&&u.alive?`<span class="tpips">${pips}</span>`:''}</button>`}

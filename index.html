@@ -829,6 +829,9 @@ img.scene{object-fit:cover;display:block}
 .tico{width:52px;height:52px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45,0 4px 8px rgba(0,0,0,.6);background:#1a1110}
 .tico .ic.icimg{width:100%!important;height:100%!important;transform:scale(.88);-webkit-mask:none;mask:none;border-radius:50%}
 .sortbar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.tok{padding-top:16px}.tok.h{padding-top:4px}
+.tok .crown{top:-15px;width:30px;height:19px;z-index:6;background:linear-gradient(180deg,#fff2b8,#ffd25e 45%,#c08a1e);filter:drop-shadow(0 1px 0 #000) drop-shadow(0 0 6px rgba(255,210,94,.8))}
+.tok.e.cur::before{top:-22px}
 /* ---- juice : couche d'effets de combat ---- */
 @property --p{syntax:'<number>';inherits:true;initial-value:100}
 @property --lag{syntax:'<number>';inherits:true;initial-value:0}
@@ -3503,7 +3506,6 @@ const spellKind=s=>s.wpn?'wpn':s.heal?'k-heal':s.base?'k-dmg':'k-buf';
 function tokenOf(u,tg,size){const c=C(),isT=tg&&tg.includes(u),isCur=c&&c.cur===u.id,m=maxHp(u),p=u.alive?clamp(Math.round(u.hp/m*100),0,100):0,sh=u.st.shield||0;
   const face=u.side==='h'?classMed(u.cls):(portraitOf(u)||`<span class="em">${u.icon}</span>`);const pips=stChips(u);const mm=u.side==='e'&&/ ([A-F])$/.exec(u.name),nm=mm?u.name.slice(0,-2):u.name;
   return`<button class="tok ${u.side} ${size} ${u.alive?'':'ko'} ${isCur?'cur':''} ${isT?'tgt':''} ${u.boss?'boss':''} ${u.alpha?'alpha':''}" data-uid="${u.id}" data-a="${isT?'target':'inspect'}" data-v="${u.id}" style="--elc:${u.side==='e'?ELC[u.el]:'#c99a45'}" aria-label="${u.name}">
-   ${u.side==='e'&&u.alive?`<span class="intent">${intentText(u)}</span>`:''}
    <span class="ring" style="--p:${p};--lag:${p}">${sh&&u.alive?`<span class="shr" style="--q:${Math.min(100,Math.round(sh/m*100))}"></span>`:''}<span class="face">${face}</span>${u.side==='h'?`<span class="lv">${u.lvl}</span>`:mm?`<span class="lv tag">${mm[1]}</span>`:''}${u.alpha?'<span class="crown"></span>':''}</span>
    <span class="plate"><b>${nm}</b><em>${u.alive?`${u.hp} / ${m}${sh?` · 🛡${sh}`:''}`:'K.O.'}</em></span>
    ${pips&&u.alive?`<span class="tpips">${pips}</span>`:''}</button>`}
