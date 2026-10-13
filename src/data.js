@@ -204,7 +204,7 @@ const WBASE=['Épée','Bâton','Arc','Dague','Marteau','Hache','Baguette','Pelle
 const IBASE={coiffe:['Coiffe','Chapeau','Heaume','Capuche'],cape:['Cape','Manteau','Pèlerine'],anneau:['Anneau','Bague','Chevalière']};
 const RAR=[{l:'Commun',m:1,n:2},{l:'Rare',m:1.2,n:3},{l:'Épique',m:1.45,n:4},{l:'Légendaire',m:1.75,n:5},{l:'Mythique',m:2.1,n:5},{l:'Divin',m:2.6,n:6}];
 const FORGE_MAX=4;
-const STL={adapt:'★ Adapt.',vita:'Vita',crit:'% Crit',pp:'PP',pui:'% Puiss.',soin:'% Soins',init:'Init.',rt:'% Terre',rf:'% Feu',re:'% Eau',ra:'% Air',pa:'PA'};
+const STL={adapt:'★ Adapt.',vita:'Vita',crit:'% Crit',pp:'PP',pui:'% Puiss.',soin:'% Soins',init:'Init.',rt:'% Rés. Terre',rf:'% Rés. Feu',re:'% Rés. Eau',ra:'% Rés. Air',pa:'PA'};
 const STC={adapt:'g',vita:'',crit:'d',pp:'',pui:'d',soin:'b',init:'',rt:'el-t',rf:'el-f',re:'el-e',ra:'el-a',pa:'g'};
 const RELIC=['Cœur','Œil','Croc','Couronne','Sceau','Larme'];
 /* Relics are a permanent collection: one per zone boss, each a small team-wide bonus that applies to every run. */

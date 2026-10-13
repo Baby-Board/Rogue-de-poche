@@ -36,7 +36,8 @@ function hstats(h){
   for(const x of Object.values(h.eq))if(x){for(const k in x.st){const v=x.st[k];if(k==='adapt')c.els.forEach(e=>it[e]+=v);else if(k[0]==='r'&&k.length===2)it.res[k[1]]+=v;else it[k]=(it[k]||0)+v}if(x.set&&x.set!=='relic'){sets[x.set]=(sets[x.set]||0)+1;setMinR[x.set]=Math.min(setMinR[x.set]??9,x.r)}}
   const setPA=Math.max(0,...Object.keys(sets).map(k=>sets[k]>=4?(setMinR[k]>=4?2:1):0));
   const tot=k=>k==='vita'?base[k]+it[k]:Math.round((base[k]+it[k])*(1+T.stat/100));const vita=base.vita+it.vita;
-  return{base,it,t:tot('t'),f:tot('f'),e:tot('e'),a:tot('a'),vita,
+  const eqB={};EL.forEach(e=>eqB[e]=Math.round(it[e]*(1+T.stat/100)));
+  return{base,it,eqB,t:tot('t'),f:tot('f'),e:tot('e'),a:tot('a'),vita,
     hp:Math.round((50+vita+tot('t')*.25)*(1+T.hp/100)),
     crit:Math.min(60,5+tot('a')/12+it.crit+T.crit),critD:30+tot('a')/6,esq:Math.min(25,tot('a')/20),
     pp:Math.round(100+tot('e')/2+it.pp+T.pp),soin:tot('f')*.42+it.soin+(T.soin||0),pui:it.pui+T.dmg,
@@ -164,7 +165,13 @@ function lanceSweep(u,t,a,b,kind){const c=C(),row=t.row,list=sweepList(u,t,kind)
 function detonate(u){const c=C();foesOf(u).filter(e=>e.st.bomb).forEach(e=>{const b=e.st.bomb;e.st.bomb=0;const row=rowOf(e).filter(x=>x!==e);
   const hitB=(x,lo,hi,o)=>{const r=hit(u,x,lo,hi,o);if(u.st.resq&&x.alive){x.st.paLoss=(x.st.paLoss||0)+2;fx(x,'−2 PA','debuff')}return r};
   if(e.alive)hitB(e,8*b,12*b);row.forEach(x=>hitB(x,4*b,6*b,{noCrit:1}))})}
-function heroMult(h,S,e){return 1+(S[e]+S.pui)/100+(e!=='f'?S.f*.002:0)}
+/* L'équipement compte double pour les dégâts : 1 Adapt. = 2 %, 1 % Puiss. = 2 % (le niveau reste à 1 pour 1). */
+function heroMult(h,S,e){return 1+(S[e]+(S.eqB?S.eqB[e]:0)+S.pui+S.it.pui)/100+(e!=='f'?S.f*.002:0)}
+/* Puissance de sort d'un héros (meilleur élément, sans cible) — sert à comparer les objets. */
+function spellPower(h,eq){const o=h.eq;if(eq)h.eq=eq;const S=hstats(h);const v=Math.max(...CLASSES[h.cls].els.map(e=>heroMult(h,S,e)));h.eq=o;return v}
+/* Compensation monstres : PV supplémentaires = gain de dégâts qu'apporte l'équipement doublé
+   pour un héros typique (4 objets rares/épiques du niveau de la zone). ≈ +16 % au début, +28 % en fin de jeu. */
+function gearComp(L){const A=(2+L*.35)*1.3*4,P=(2+L*.12)*1.3*1.5,b=4.8*Math.max(0,L-1);return(1+(b+2*A+2*P)/100)/(1+(b+A+P)/100)}
 function bestEl(h,t,S){let best=null,bv=-1e9;CLASSES[h.cls].els.forEach(e=>{const v=heroMult(h,S,e)*(1-clamp(t?resOf(t,e):0,-50,60)/100);if(v>bv){bv=v;best=e}});return best}
 /* Every damage modifier except the crit roll, shared by real hits and by the previews shown on spells. */
 function dmgMult(src,t,el,o={},S){
@@ -220,7 +227,7 @@ function ko(u){u.alive=false;u.hp=0;const keep=u.side==='e'?{}:{};u.st=keep;log(
 function hashRes(name){let h=7;for(const ch of name)h=(h*31+ch.charCodeAt(0))|0;return h>>>0}
 function mkEnemy(def,L,o={}){
   const A=def.boss?null:ARCH[def.arch];const sm=diffMul(run.pos.r);const n=run.heroes.length;
-  let hp=29*(1+.08*L)*(def.boss?4.6:A.hp)*sm*(.55+.225*n),d=8*(1+.06*L)*(def.boss?1.25:A.d)*sm;
+  let hp=29*(1+.08*L)*(def.boss?4.6:A.hp)*sm*(.55+.225*n)*gearComp(L),d=8*(1+.06*L)*(def.boss?1.25:A.d)*sm;
   const res={t:0,f:0,e:0,a:0};const h=hashRes(def.n);EL.forEach((e,i)=>{res[e]=((h>>(i*4))&15)-5});res[def.el]=def.boss?25:20;res[OPP[def.el]]=-15;
   const alpha=!def.boss&&Math.random()*100<alphaChance();
   if(alpha){hp*=1.6;d*=1.25;EL.forEach(e=>res[e]+=5)}

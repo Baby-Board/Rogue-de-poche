@@ -63,13 +63,14 @@ function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h)
   <div class="stack">${invList(it=>itemBtn(it))||`<p class="mute">${run.inv.length?'Aucun objet de ce type.':'Le sac est vide.'}</p>`}</div>`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
   let diff='';if(f.where==='inv'){const keys=[...new Set(Object.keys(it.st).concat(cur?Object.keys(cur.st):[]))];diff=keys.map(k=>{const d=(it.st[k]||0)-(cur?cur.st[k]||0:0);return d?`<span class="chip ${d>0?'up':'dn'}">${d>0?'+':''}${d} ${STL[k]}</span>`:''}).join('')}
+  let pdiff='';{const p0=spellPower(h),q=Object.assign({},h.eq);if(f.where==='inv')q[it.slot]=it;else q[it.slot]=null;const p1=spellPower(h,q);const d=f.where==='inv'?Math.round((p1/p0-1)*100):Math.round((p0/p1-1)*100);pdiff=d?`<span class="chip ${d>0?'up':'dn'}" style="font-weight:900">${d>0?'+':''}${d} % dégâts des sorts</span>`:''}
   let wdiff='';if(f.where==='inv'&&it.w){const ca=cur&&cur.w?cur.w:{a:3,b:5};const da=Math.round((it.w.a+it.w.b)/2-(ca.a+ca.b)/2);if(da)wdiff=`<span class="chip ${da>0?'up':'dn'}">${da>0?'+':''}${da} ⚔ moy.</span>`}
   const atShop=run.phase==='shop',atForge=run.phase==='forge';
   return sheet(SLOTS[it.slot],`<div class="item ir${it.r}">${itemHTML(it)}</div>
   ${f.where!=='inv'?`<p class="mute" style="margin:0">Porté par ${f.where.name}.</p><button class="btn" data-a="unequip" data-v="${it.id}">Retirer</button>`:`
    <div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
    <div class="cmp"><span class="lab">Équipé sur ${h.name}</span>${cur?`<div class="item ir${cur.r}">${itemHTML(cur)}</div>`:'<p class="mute" style="margin:0">Rien dans cet emplacement.</p>'}
-   ${diff||wdiff?`<span class="lab">Si tu équipes le nouvel objet</span><div class="chips">${diff}${wdiff}</div>`:''}</div>
+   ${f.where==='inv'&&(diff||wdiff||pdiff)?`<span class="lab">Si ${h.name} équipe cet objet</span><div class="chips">${pdiff}${diff}${wdiff}</div>`:''}${f.where!=='inv'&&pdiff?`<span class="lab">Apport de cet objet</span><div class="chips">${pdiff}</div>`:''}</div>
    <button class="btn main" data-a="equip" data-v="${it.id}">Équiper sur ${h.name}</button>`}
   ${atShop&&f.where==='inv'?`<button class="btn" data-a="sell" data-v="${it.id}">Vendre · ${coin()} ${fmt(sellPrice(it))}</button>`:''}
   ${atForge&&it.r<FORGE_MAX?`<button class="btn" data-a="forge" data-v="${it.id}" ${run.gold<forgeCost(it)?'disabled':''}>Forger en <span class="r${it.r+1}">${RAR[it.r+1].l}</span> · ${coin()} ${fmt(forgeCost(it))}</button>`:''}
