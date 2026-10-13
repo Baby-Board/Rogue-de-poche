@@ -906,7 +906,7 @@ img.scene{object-fit:cover;display:block}
 <div id="app"></div>
 <div id="modal" hidden></div>
 <div id="toasts"></div>
-<script>const APPV=89;'use strict';
+<script>const APPV=90;'use strict';
 /* ================= Utilities ================= */
 const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -1056,7 +1056,7 @@ Object.assign(SP,{
   so_avide:{n:'Chant avide',pa:4,tg:'front',base:[8,12],txt:"Chaque allié récupère 25 % des dégâts infligés.",fn:(u,t)=>{const r=hit(u,t,8,12);if(r&&r.real){const v=Math.round(r.real*.25);if(v)heroesAlive().forEach(a=>heal(u,a,v,v,{raw:1}))}}},
   so_double:{n:'Chant double',pa:3,tg:'unit',base:[6,9],txt:"Soigne un allié, ou frappe un ennemi de n'importe quelle rangée.",fn:(u,t)=>t.side==='h'?heal(u,t,6,9):hit(u,t,6,9)},
   so_restaure:{n:'Chant restaurateur',pa:6,tg:'ally',cd:4,txt:"Rend tous ses PV manquants à l'allié.",fn:(u,t)=>{const v=maxHp(t)-t.hp;heal(u,t,v,v,{raw:1})}},
-  so_choeur:{n:'Chœur',pa:2,tg:'allAllies',cd:2,heal:1,base:[8,12],txt:"Soigne toute l'équipe.",fn:u=>heroesAlive().forEach(a=>heal(u,a,8,12))},
+  so_choeur:{n:'Chœur',pa:2,tg:'allAllies',pt:1,heal:1,base:[8,12],txt:"Soigne toute l'équipe. 1×/tour.",fn:u=>heroesAlive().forEach(a=>heal(u,a,8,12))},
   so_elan:{n:"Chant d'élan",pa:3,tg:'ally',cd:2,txt:"Bouclier de 15 % des PV max, puis soin de 5 % des PV max au début de chacun de ses 3 prochains tours.",fn:(u,t)=>{shield(t,maxHp(t)*.15);t.st.galva={t:3,v:Math.max(1,Math.round(maxHp(t)*.05))}}},
   so_eveil:{n:"Chant d'éveil",pa:2,tg:'allyOther',tcd:3,txt:'Un allié gagne +2 PA à son prochain tour. Même allié : 3 tours d’attente.',fn:(u,t)=>{t.st.bonusPA=(t.st.bonusPA||0)+2;fx(t,'+2 PA','buff')}},
   /* Passeuse */
