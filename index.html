@@ -829,6 +829,10 @@ img.scene{object-fit:cover;display:block}
 .tico{width:52px;height:52px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45,0 4px 8px rgba(0,0,0,.6);background:#1a1110}
 .tico .ic.icimg{width:100%!important;height:100%!important;transform:scale(.88);-webkit-mask:none;mask:none;border-radius:50%}
 .sortbar{display:flex;gap:6px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.sellbulk{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px}
+.sb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:12px;background:var(--plaque);border:1px solid var(--rc,var(--line));font-size:13px}
+.sb.ir0{--rc:#2f5634}.sb.ir1{--rc:#28507a}.sb.ir2{--rc:#4f3a7a}.sb.ir3{--rc:#7a4a1c}.sb.ir4{--rc:#8a7224}.sb.ir5{--rc:#a8302e}
+.sb b{font-size:13.5px;white-space:nowrap}.sb span{display:inline-flex;align-items:center;gap:3px;font-weight:900;color:var(--crit)}.sb .ic{width:14px;height:14px}
 .slotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .sf{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);font:800 11.5px var(--f-body);min-width:0}
 .sf .ic,.sf .icoimg{width:22px;height:22px}
@@ -3584,10 +3588,10 @@ function vTaverne(){const t=run.tav,full=run.heroes.length>=4;return`${runBar()}
   <button class="opt" data-a="tavheal">${emblem('potion')}<div><b>Se soigner</b><small>Toute l'équipe récupère 50 % de ses PV max. Les héros K.O. se relèvent.</small></div></button>
   ${full?'<p class="mute" style="margin:0">L\'équipe est au complet (4 héros).</p>':`<span class="lab">Ou recruter</span><div class="cards">${t.opts.map(c=>{const k=CLASSES[c];return`<button class="ccard" data-a="recruit" data-v="${c}"><div class="top">${clsAva(c)}<div><b>${k.n}</b><br><span class="tag ${k.row}">${k.role}</span> ${els(c)}</div></div><p>${k.blurb}</p></button>`}).join('')}</div>`}`}
   <div class="dock"><div><button class="btn ${t.done?'main':''}" data-a="leave">Repartir</button></div></div></div>`}
-function vShop(){const s=run.shop;const tab=ui.shopTab;const greens=run.inv.filter(x=>x.r===0);return`${runBar()}<div class="screen">${placeBan('shop')}<div class="head ph">${emblem('shop')}<div><h2 class="gilt">Comptoir</h2><small>Tout est d'occasion, rien n'est maudit</small></div></div>
+function vShop(){const s=run.shop;const tab=ui.shopTab;return`${runBar()}<div class="screen">${placeBan('shop')}<div class="head ph">${emblem('shop')}<div><h2 class="gilt">Comptoir</h2><small>Tout est d'occasion, rien n'est maudit</small></div></div>
   <div class="tabs"><button class="tab ${tab==='buy'?'on':''}" data-a="shoptab" data-v="buy">Acheter</button><button class="tab ${tab==='sell'?'on':''}" data-a="shoptab" data-v="sell">Vendre (${run.inv.length})</button></div>
   ${tab==='buy'?`<div class="stack">${s.items.map((x,i)=>`<button class="item ir${x.it.r} ${x.sold?'sold':''}" data-a="buy" data-v="${i}" ${x.sold||run.gold<x.price?'disabled':''}>${itemHTML(x.it,x.sold?'<span class="price">Vendu</span>':price(x.price))}</button>`).join('')}</div>`
-  :`${sortBar()}${greens.length?`<button class="btn" data-a="sellgreen">Vendre tous les objets verts (${greens.length}) · ${coin()} ${fmt(greens.reduce((s,x)=>s+sellPrice(x),0))}</button>`:''}${run.inv.length?`<div class="stack">${invList(it=>`<button class="item ir${it.r}" data-a="sell" data-v="${it.id}">${itemHTML(it,price(sellPrice(it)))}</button>`)||'<p class="mute">Aucun objet de ce type.</p>'}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le vendre aussitôt. Les objets équipés ne sont pas listés.</p>`:'<p class="mute">Le sac est vide.</p>'}`}
+  :`${sortBar()}${sellBulk()}${run.inv.length?`<div class="stack">${invList(it=>`<button class="item ir${it.r}" data-a="sell" data-v="${it.id}">${itemHTML(it,price(sellPrice(it)))}</button>`)||'<p class="mute">Aucun objet de ce type.</p>'}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le vendre aussitôt. Les objets équipés ne sont pas listés.</p>`:'<p class="mute">Le sac est vide.</p>'}`}
   <div class="dock"><div><button class="btn" data-a="leave">Repartir</button></div></div></div>`}
 function allItems(){const l=run.inv.slice();run.heroes.forEach(h=>Object.values(h.eq).forEach(x=>x&&l.push(x)));return l}
 function vForge(){const l=allItems().filter(x=>x.r<FORGE_MAX).sort((a,b)=>b.tier-a.tier||b.r-a.r);return`${runBar()}<div class="screen">${placeBan('forge')}<div class="head ph">${emblem('forge')}<div><h2 class="gilt">Forge</h2><small>L'enclume chante encore</small></div></div>
@@ -3602,6 +3606,10 @@ function vEnd(){const win=run.result==='win';return`<div class="endscr"><div cla
   ${run.daily?`<div class="daily end"><span class="dl-badge">Défi du jour</span><b class="dl-score">${fmt(run.daily.score||0)}</b><small>${(run.daily.score||0)>(run.daily.prev||0)?'Nouveau record du jour !':`Record du jour : ${fmt(run.daily.prev)}`}</small><small class="mute">Zone ${run.z+1} · ${run.daily.kills||0} monstres vaincus · ${fmt(run.gold)} écus</small></div>`:''}
   <p class="mute">Talismans, bestiaire, reliques et succès sont conservés.</p>
   <button class="btn main" data-a="endok">Retour à l'accueil</button></div>`}
+/* Vente groupée : par rareté (dans le filtre actif) + tout vendre (2 touches) */
+function sellBulk(){const l=sortedInv();if(!l.length)return'';const by={};l.forEach(x=>{(by[x.r]=by[x.r]||[]).push(x)});const sum=a=>fmt(a.reduce((s,x)=>s+sellPrice(x),0));const lab=RAR.map(r=>r.l.toLowerCase());
+  return`<div class="sellbulk">${Object.keys(by).sort((a,b)=>a-b).map(r=>`<button class="sb ir${r}" data-a="sellr" data-v="${r}"><b class="r${r}">${by[r].length} ${lab[r]}${by[r].length>1?'s':''}</b><span>${coin()} ${sum(by[r])}</span></button>`).join('')}</div>
+  <button class="btn ${ui.sellAll?'main danger':''}" data-a="sellall">${ui.sellAll?'Confirmer la vente':`Tout vendre${ui.invSlot?' ('+SLOTS[ui.invSlot].toLowerCase()+')':''}`} · ${l.length} objet${l.length>1?'s':''} · ${coin()} ${sum(l)}</button>`}
 function sortedInv(){const so=Object.keys(SLOTS);const f=ui.invSlot;const l=run.inv.filter(x=>!f||x.slot===f);if(ui.invSort==='set')return l.sort((a,b)=>(a.setN||'').localeCompare(b.setN||'')||so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.tier-a.tier||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
 const sortBar=()=>{const c={};run.inv.forEach(x=>c[x.slot]=(c[x.slot]||0)+1);
   return`<div class="slotbar">${[['','Tout',run.inv.length]].concat(Object.keys(SLOTS).map(k=>[k,SLOTS[k],c[k]||0])).map(([k,l,n])=>`<button class="sf ${(ui.invSlot||'')===k?'on':''}" data-a="invslot" data-v="${k}" ${n||!k?'':'disabled'}>${ico(k||'bag')}<span>${l}</span><em>${n}</em></button>`).join('')}</div>
@@ -3951,13 +3959,14 @@ const A={
   recruit:c=>{if(run.heroes.length>=4)return;meta.cnt.recruits=(meta.cnt.recruits||0)+1;const lv=Math.max(...run.heroes.map(h=>h.lvl));const h=newHero(c,Math.max(WORLDS[run.w].lv[0],lv-1));normSlots();const used=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);let s=0;while(used.includes(s))s++;if(s>3){h.row=h.row==='front'?'back':'front';const u2=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);s=0;while(u2.includes(s))s++}h.slot=s;run.heroes.push(h);
     starterKit(h,h.lvl,run.w);
     meta.cnt.maxTeam=Math.max(meta.cnt.maxTeam,run.heroes.length);run.tav.done=`${CLASSES[c].n} rejoint l'équipe au niveau ${h.lvl}, ${run.w?'avec une panoplie de départ':'sans équipement'}. Place-le dans la Formation si besoin.`;checkQuests();saveMeta();saveRun();render()},
-  sellgreen:()=>{if(run.phase!=='shop')return;const g=run.inv.filter(x=>x.r===0);const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>x.r!==0);meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objets vendus : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()},
+  sellr:r=>{if(run.phase!=='shop')return;r=+r;bulkSell(sortedInv().filter(x=>x.r===r))},
+  sellall:()=>{if(run.phase!=='shop')return;if(!ui.sellAll){ui.sellAll=1;render();clearTimeout(ui._sat);ui._sat=setTimeout(()=>{ui.sellAll=0;render()},3000);return}ui.sellAll=0;bulkSell(sortedInv())},
   shoptab:v=>{ui.shopTab=v;render()},
   buy:i=>{const x=run.shop.items[+i];if(x.sold||run.gold<x.price)return;run.gold-=x.price;meta.cnt.spent+=x.price;meta.cnt.bought++;x.sold=true;addInv(x.it);toast(x.it.name+' ajouté au sac');checkQuests();saveMeta();saveRun();render()},
   item:id=>{ui.itemId=id;ui.modal='item';render()},
   invh:i=>{ui.invHero=+i;render()},
   invsort:v=>{ui.invSort=v;render()},
-  invslot:v=>{ui.invSlot=v||null;render()},
+  invslot:v=>{ui.sellAll=0;ui.invSlot=v||null;render()},
   invgrp:v=>{const k=decodeURIComponent(v);ui.invOpen=ui.invOpen||{};ui.invOpen[k]=!ui.invOpen[k];render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
   unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
@@ -3998,4 +4007,6 @@ function resume(){
 function boot(data){if(data&&data.run){run=data.run;ui.screen=data.screen||'home'}checkQuests();render();if(ui.screen==='run')resume()}
 try{window.claude?.hot?.snapshot?.(()=>({run,screen:ui.screen}))}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
+
+function bulkSell(g){if(!g.length)return;const ids=new Set(g.map(x=>x.id));const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>!ids.has(x.id));meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objet${g.length>1?'s':''} vendu${g.length>1?'s':''} : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()}
 </script><script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>

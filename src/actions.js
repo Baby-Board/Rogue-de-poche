@@ -36,13 +36,14 @@ const A={
   recruit:c=>{if(run.heroes.length>=4)return;meta.cnt.recruits=(meta.cnt.recruits||0)+1;const lv=Math.max(...run.heroes.map(h=>h.lvl));const h=newHero(c,Math.max(WORLDS[run.w].lv[0],lv-1));normSlots();const used=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);let s=0;while(used.includes(s))s++;if(s>3){h.row=h.row==='front'?'back':'front';const u2=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);s=0;while(u2.includes(s))s++}h.slot=s;run.heroes.push(h);
     starterKit(h,h.lvl,run.w);
     meta.cnt.maxTeam=Math.max(meta.cnt.maxTeam,run.heroes.length);run.tav.done=`${CLASSES[c].n} rejoint l'équipe au niveau ${h.lvl}, ${run.w?'avec une panoplie de départ':'sans équipement'}. Place-le dans la Formation si besoin.`;checkQuests();saveMeta();saveRun();render()},
-  sellgreen:()=>{if(run.phase!=='shop')return;const g=run.inv.filter(x=>x.r===0);const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>x.r!==0);meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objets vendus : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()},
+  sellr:r=>{if(run.phase!=='shop')return;r=+r;bulkSell(sortedInv().filter(x=>x.r===r))},
+  sellall:()=>{if(run.phase!=='shop')return;if(!ui.sellAll){ui.sellAll=1;render();clearTimeout(ui._sat);ui._sat=setTimeout(()=>{ui.sellAll=0;render()},3000);return}ui.sellAll=0;bulkSell(sortedInv())},
   shoptab:v=>{ui.shopTab=v;render()},
   buy:i=>{const x=run.shop.items[+i];if(x.sold||run.gold<x.price)return;run.gold-=x.price;meta.cnt.spent+=x.price;meta.cnt.bought++;x.sold=true;addInv(x.it);toast(x.it.name+' ajouté au sac');checkQuests();saveMeta();saveRun();render()},
   item:id=>{ui.itemId=id;ui.modal='item';render()},
   invh:i=>{ui.invHero=+i;render()},
   invsort:v=>{ui.invSort=v;render()},
-  invslot:v=>{ui.invSlot=v||null;render()},
+  invslot:v=>{ui.sellAll=0;ui.invSlot=v||null;render()},
   invgrp:v=>{const k=decodeURIComponent(v);ui.invOpen=ui.invOpen||{};ui.invOpen[k]=!ui.invOpen[k];render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
   unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
@@ -83,3 +84,5 @@ function resume(){
 function boot(data){if(data&&data.run){run=data.run;ui.screen=data.screen||'home'}checkQuests();render();if(ui.screen==='run')resume()}
 try{window.claude?.hot?.snapshot?.(()=>({run,screen:ui.screen}))}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
+
+function bulkSell(g){if(!g.length)return;const ids=new Set(g.map(x=>x.id));const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>!ids.has(x.id));meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objet${g.length>1?'s':''} vendu${g.length>1?'s':''} : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()}
