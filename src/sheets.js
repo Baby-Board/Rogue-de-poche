@@ -3,7 +3,7 @@ const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',br
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
   const m=ui.modal;if(!m){modal.hidden=true;modal.innerHTML='';return}
-  const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu,spell:shSpell}[m];
+  const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,slot:shSlot,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu,spell:shSpell}[m];
   if(!f||(['stats','form','inv','item','potion','log','inspect','menu','spell'].includes(m)&&!run)){ui.modal=null;modal.hidden=true;return}
   const out=f();if(!out){ui.modal=null;modal.hidden=true;return}
   modal.innerHTML=out;modal.hidden=false}
@@ -57,10 +57,18 @@ function shRelics(){const own=k=>!!meta.relics[k];
 function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h);const sets={};const minR={};Object.values(h.eq).forEach(x=>{if(x&&x.set!=='relic'){sets[x.setN]=(sets[x.setN]||0)+1;minR[x.setN]=Math.min(minR[x.setN]??9,x.r)}});
   return sheet('Équipement',`<div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
   <div class="chips"><span class="chip">PV max ${S.hp}</span><span class="chip" style="color:#bfe3ff">${S.pa} PA</span><span class="chip">Prosp. ${S.pp}</span></div>
-  <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];return it?itemBtn(it,`<span class="slotlab">${SLOTS[s]}</span>`):`<div class="item" style="opacity:.55;border-style:dashed"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b></div></div>`}).join('')}</div>
-  ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
+  <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];const n=run.inv.filter(x=>x.slot===s).length;const nb=n?`<span class="slotlab">${SLOTS[s]}<br><em class="slotn">${n} dans le sac</em></span>`:`<span class="slotlab">${SLOTS[s]}</span>`;return it?`<button class="item ir${it.r}" data-a="slotpick" data-v="${s}">${itemHTML(it,nb)}</button>`:`<button class="item" style="opacity:${n?.85:.55};border-style:dashed" data-a="slotpick" data-v="${s}"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b>${n?nb:''}</div></button>`}).join('')}</div>
+  ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}" style="white-space:normal">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
   <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span></div>${sortBar()}
   <div class="stack">${invList(it=>itemBtn(it))||`<p class="mute">${run.inv.length?'Aucun objet de ce type.':'Le sac est vide.'}</p>`}</div>`)}
+/* Emplacement d'un héros : objet porté + objets du sac du même type, triés par gain de dégâts, équipables en une touche */
+function shSlot(){const h=run.heroes[ui.invHero]||run.heroes[0];const k=ui.slotK;const cur=h.eq[k];const p0=spellPower(h);
+  const gain=it=>{const q=Object.assign({},h.eq);q[k]=it;return Math.round((spellPower(h,q)/p0-1)*100)};
+  const l=run.inv.filter(x=>x.slot===k).map(it=>({it,g:gain(it)})).sort((a,b)=>b.g-a.g||b.it.r-a.it.r||b.it.tier-a.it.tier);
+  const chip=g=>`<span class="chip ${g>0?'up':g<0?'dn':''}" style="font-weight:900;margin-left:auto;white-space:nowrap">${g>0?'+':''}${g} %</span>`;
+  return sheet(SLOTS[k]+' · '+h.name,`<div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
+  <span class="lab">Équipé</span>${cur?`<div class="item ir${cur.r}">${itemHTML(cur)}</div><button class="btn" data-a="unequip" data-v="${cur.id}">Retirer</button>`:'<p class="mute" style="margin:0">Rien dans cet emplacement.</p>'}
+  <span class="lab">Dans le sac (${l.length})</span>${l.length?`<p class="mute" style="margin:0;font-size:13px">Le % indique le changement de dégâts des sorts. Touche un objet pour l'équiper.</p><div class="stack">${l.map(({it,g})=>`<button class="item ir${it.r}" data-a="swap" data-v="${it.id}">${itemHTML(it,chip(g))}</button>`).join('')}</div>`:`<p class="mute" style="margin:0">Aucune ${SLOTS[k].toLowerCase()} dans le sac.</p>`}`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
   let diff='';if(f.where==='inv'){const keys=[...new Set(Object.keys(it.st).concat(cur?Object.keys(cur.st):[]))];diff=keys.map(k=>{const d=(it.st[k]||0)-(cur?cur.st[k]||0:0);return d?`<span class="chip ${d>0?'up':'dn'}">${d>0?'+':''}${d} ${STL[k]}</span>`:''}).join('')}
   let pdiff='';{const p0=spellPower(h),q=Object.assign({},h.eq);if(f.where==='inv')q[it.slot]=it;else q[it.slot]=null;const p1=spellPower(h,q);const d=f.where==='inv'?Math.round((p1/p0-1)*100):Math.round((p0/p1-1)*100);pdiff=d?`<span class="chip ${d>0?'up':'dn'}" style="font-weight:900">${d>0?'+':''}${d} % dégâts des sorts</span>`:''}

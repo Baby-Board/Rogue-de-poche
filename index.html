@@ -834,6 +834,7 @@ img.scene{object-fit:cover;display:block}
 .sb.ir0{--rc:#2f5634}.sb.ir1{--rc:#28507a}.sb.ir2{--rc:#4f3a7a}.sb.ir3{--rc:#7a4a1c}.sb.ir4{--rc:#8a7224}.sb.ir5{--rc:#a8302e}
 .sb b{font-size:13.5px;white-space:nowrap}.sb small{font-size:12px}.sellbulk.wide{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.sb .sbn{white-space:normal;text-align:center;line-height:1.15}.sb span{display:inline-flex;align-items:center;gap:3px;font-weight:900;color:var(--crit)}.sb .ic{width:14px;height:14px}
 .setbar{display:flex;gap:5px;flex-wrap:wrap;margin-top:-2px}.setbar::-webkit-scrollbar{display:none}.setbar .tab{font-size:13px;padding:5px 10px;white-space:nowrap}.setbar em{font-style:normal;opacity:.6;font-size:12px}
+.slotn{font-style:normal;font-size:10.5px;letter-spacing:0;color:var(--r1);text-transform:none;font-family:var(--f-body)}.item .slotlab{text-align:right;line-height:1.3}
 .slotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .sf{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);font:800 11.5px var(--f-body);min-width:0}
 .sf .ic,.sf .icoimg{width:22px;height:22px}
@@ -896,7 +897,7 @@ img.scene{object-fit:cover;display:block}
 <div id="app"></div>
 <div id="modal" hidden></div>
 <div id="toasts"></div>
-<script>const APPV=85;'use strict';
+<script>const APPV=87;'use strict';
 /* ================= Utilities ================= */
 const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -3840,7 +3841,7 @@ const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',br
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
   const m=ui.modal;if(!m){modal.hidden=true;modal.innerHTML='';return}
-  const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu,spell:shSpell}[m];
+  const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,slot:shSlot,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu,spell:shSpell}[m];
   if(!f||(['stats','form','inv','item','potion','log','inspect','menu','spell'].includes(m)&&!run)){ui.modal=null;modal.hidden=true;return}
   const out=f();if(!out){ui.modal=null;modal.hidden=true;return}
   modal.innerHTML=out;modal.hidden=false}
@@ -3894,10 +3895,18 @@ function shRelics(){const own=k=>!!meta.relics[k];
 function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h);const sets={};const minR={};Object.values(h.eq).forEach(x=>{if(x&&x.set!=='relic'){sets[x.setN]=(sets[x.setN]||0)+1;minR[x.setN]=Math.min(minR[x.setN]??9,x.r)}});
   return sheet('Équipement',`<div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
   <div class="chips"><span class="chip">PV max ${S.hp}</span><span class="chip" style="color:#bfe3ff">${S.pa} PA</span><span class="chip">Prosp. ${S.pp}</span></div>
-  <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];return it?itemBtn(it,`<span class="slotlab">${SLOTS[s]}</span>`):`<div class="item" style="opacity:.55;border-style:dashed"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b></div></div>`}).join('')}</div>
-  ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
+  <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];const n=run.inv.filter(x=>x.slot===s).length;const nb=n?`<span class="slotlab">${SLOTS[s]}<br><em class="slotn">${n} dans le sac</em></span>`:`<span class="slotlab">${SLOTS[s]}</span>`;return it?`<button class="item ir${it.r}" data-a="slotpick" data-v="${s}">${itemHTML(it,nb)}</button>`:`<button class="item" style="opacity:${n?.85:.55};border-style:dashed" data-a="slotpick" data-v="${s}"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b>${n?nb:''}</div></button>`}).join('')}</div>
+  ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}" style="white-space:normal">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
   <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span></div>${sortBar()}
   <div class="stack">${invList(it=>itemBtn(it))||`<p class="mute">${run.inv.length?'Aucun objet de ce type.':'Le sac est vide.'}</p>`}</div>`)}
+/* Emplacement d'un héros : objet porté + objets du sac du même type, triés par gain de dégâts, équipables en une touche */
+function shSlot(){const h=run.heroes[ui.invHero]||run.heroes[0];const k=ui.slotK;const cur=h.eq[k];const p0=spellPower(h);
+  const gain=it=>{const q=Object.assign({},h.eq);q[k]=it;return Math.round((spellPower(h,q)/p0-1)*100)};
+  const l=run.inv.filter(x=>x.slot===k).map(it=>({it,g:gain(it)})).sort((a,b)=>b.g-a.g||b.it.r-a.it.r||b.it.tier-a.it.tier);
+  const chip=g=>`<span class="chip ${g>0?'up':g<0?'dn':''}" style="font-weight:900;margin-left:auto;white-space:nowrap">${g>0?'+':''}${g} %</span>`;
+  return sheet(SLOTS[k]+' · '+h.name,`<div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
+  <span class="lab">Équipé</span>${cur?`<div class="item ir${cur.r}">${itemHTML(cur)}</div><button class="btn" data-a="unequip" data-v="${cur.id}">Retirer</button>`:'<p class="mute" style="margin:0">Rien dans cet emplacement.</p>'}
+  <span class="lab">Dans le sac (${l.length})</span>${l.length?`<p class="mute" style="margin:0;font-size:13px">Le % indique le changement de dégâts des sorts. Touche un objet pour l'équiper.</p><div class="stack">${l.map(({it,g})=>`<button class="item ir${it.r}" data-a="swap" data-v="${it.id}">${itemHTML(it,chip(g))}</button>`).join('')}</div>`:`<p class="mute" style="margin:0">Aucune ${SLOTS[k].toLowerCase()} dans le sac.</p>`}`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
   let diff='';if(f.where==='inv'){const keys=[...new Set(Object.keys(it.st).concat(cur?Object.keys(cur.st):[]))];diff=keys.map(k=>{const d=(it.st[k]||0)-(cur?cur.st[k]||0:0);return d?`<span class="chip ${d>0?'up':'dn'}">${d>0?'+':''}${d} ${STL[k]}</span>`:''}).join('')}
   let pdiff='';{const p0=spellPower(h),q=Object.assign({},h.eq);if(f.where==='inv')q[it.slot]=it;else q[it.slot]=null;const p1=spellPower(h,q);const d=f.where==='inv'?Math.round((p1/p0-1)*100):Math.round((p0/p1-1)*100);pdiff=d?`<span class="chip ${d>0?'up':'dn'}" style="font-weight:900">${d>0?'+':''}${d} % dégâts des sorts</span>`:''}
@@ -3953,7 +3962,7 @@ const A={
   abandon:()=>{clearTimeout(timer);busy=false;meta.cnt.runsEnded++;run.phase='end';updateZoneMax();checkQuests();saveMeta();run=null;saveRun();ui.confirm=null;render()},
   endok:()=>{run=null;saveRun();ui.screen='home';ui.star=meta.worlds[ui.world].starMax;render()},
   sheet:v=>{ui.modal=v;if(v==='inv'||v==='item'){}if(v==='best'&&run)ui.bestW=run.w;render()},
-  close:()=>{ui.modal=null;ui.form=null;render()},
+  close:()=>{if(ui.modal==='slot'){ui.modal='inv';render();return}ui.modal=null;ui.form=null;render()},
   mapsel:v=>{ui.mapSel=ui.mapSel===v?null:v;render()},
   go:v=>{const [r,i]=v.split(':').map(Number);enterNode(r,i)},
   spell:id=>{const c=C();const h=unit(c.cur);if(!h||h.side!=='h'||busy)return;if(blockReason(h,id))return;const sp=spellOf(h,id);
@@ -3982,6 +3991,8 @@ const A={
   sellall:()=>{if(run.phase!=='shop')return;if(!ui.sellAll){ui.sellAll=1;render();clearTimeout(ui._sat);ui._sat=setTimeout(()=>{ui.sellAll=0;render()},3000);return}ui.sellAll=0;bulkSell(sortedInv())},
   shoptab:v=>{ui.shopTab=v;render()},
   buy:i=>{const x=run.shop.items[+i];if(x.sold||run.gold<x.price)return;run.gold-=x.price;meta.cnt.spent+=x.price;meta.cnt.bought++;x.sold=true;addInv(x.it);toast(x.it.name+' ajouté au sac');checkQuests();saveMeta();saveRun();render()},
+  slotpick:k=>{ui.slotK=k;ui.modal='slot';render()},
+  swap:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);toast(`${h.name} équipe ${f.it.name}`);saveMeta();saveRun();render()},
   item:id=>{ui.itemId=id;ui.modal='item';render()},
   invh:i=>{ui.invHero=+i;render()},
   invsort:v=>{ui.invSort=v;render()},
@@ -3989,7 +4000,7 @@ const A={
   invslot:v=>{ui.sellAll=0;ui.invSlot=v||null;render()},
   invgrp:v=>{const k=decodeURIComponent(v);ui.invOpen=ui.invOpen||{};ui.invOpen[k]=!ui.invOpen[k];render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
-  unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
+  unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal=ui.modal==='slot'?'slot':'inv';saveRun();render()},
   sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`${f.it.name} vendu : +${fmt(p)} écus`);checkQuests();saveMeta();saveRun();render()},
   forge:id=>{const f=findItem(id);if(!f||f.it.r>=FORGE_MAX)return;const c=forgeCost(f.it);if(run.gold<c)return;const h=f.where!=='inv'?f.where:null;const before=h?maxHp(h):0;run.gold-=c;meta.cnt.spent+=c;forgeItem(f.it);if(h&&h.alive)h.hp=clamp(h.hp+maxHp(h)-before,1,maxHp(h));toast(`${f.it.name} devient ${RAR[f.it.r].l} !`);checkQuests();saveMeta();saveRun();render()},
   drink:id=>{const h=run.heroes.find(x=>x.id===id);if(!h||!h.alive||!run.potions||run.phase==='combat')return;run.potions--;healPct(h,.35);meta.cnt.potions++;checkQuests();saveMeta();saveRun();render()},
