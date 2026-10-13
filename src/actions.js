@@ -36,7 +36,8 @@ const A={
   recruit:c=>{if(run.heroes.length>=4)return;meta.cnt.recruits=(meta.cnt.recruits||0)+1;const lv=Math.max(...run.heroes.map(h=>h.lvl));const h=newHero(c,Math.max(WORLDS[run.w].lv[0],lv-1));normSlots();const used=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);let s=0;while(used.includes(s))s++;if(s>3){h.row=h.row==='front'?'back':'front';const u2=run.heroes.filter(x=>x.row===h.row).map(x=>x.slot);s=0;while(u2.includes(s))s++}h.slot=s;run.heroes.push(h);
     starterKit(h,h.lvl,run.w);
     meta.cnt.maxTeam=Math.max(meta.cnt.maxTeam,run.heroes.length);run.tav.done=`${CLASSES[c].n} rejoint l'équipe au niveau ${h.lvl}, ${run.w?'avec une panoplie de départ':'sans équipement'}. Place-le dans la Formation si besoin.`;checkQuests();saveMeta();saveRun();render()},
-  sellr:r=>{if(run.phase!=='shop')return;r=+r;bulkSell(sortedInv().filter(x=>x.r===r))},
+  sellg:v=>{if(run.phase!=='shop')return;const i=v.indexOf(':'),k=v[0],x=decodeURIComponent(v.slice(i+1));bulkSell(sortedInv().filter(it=>k==='r'?it.r===+x:k==='t'?it.tier===+x:it.setN===x))},
+  sellby:v=>{ui.sellBy=v;ui.sellAll=0;render()},
   sellall:()=>{if(run.phase!=='shop')return;if(!ui.sellAll){ui.sellAll=1;render();clearTimeout(ui._sat);ui._sat=setTimeout(()=>{ui.sellAll=0;render()},3000);return}ui.sellAll=0;bulkSell(sortedInv())},
   shoptab:v=>{ui.shopTab=v;render()},
   buy:i=>{const x=run.shop.items[+i];if(x.sold||run.gold<x.price)return;run.gold-=x.price;meta.cnt.spent+=x.price;meta.cnt.bought++;x.sold=true;addInv(x.it);toast(x.it.name+' ajouté au sac');checkQuests();saveMeta();saveRun();render()},
