@@ -844,6 +844,8 @@ img.scene{object-fit:cover;display:block}
 .stab.ir0{--rc:var(--r0)}.stab.ir1{--rc:var(--r1)}.stab.ir2{--rc:var(--r2)}.stab.ir3{--rc:var(--r3)}.stab.ir4{--rc:var(--r4)}.stab.ir5{--rc:var(--r5)}
 .stab span{font:800 12.5px var(--f-body);color:var(--ink)}.stab em{font-style:normal;font-size:10.5px;white-space:nowrap}
 .stab.on{border-color:var(--gold,#e0b04a);box-shadow:0 0 0 1px var(--gold,#e0b04a) inset,0 0 10px rgba(224,176,74,.25)}
+.dl-loot{display:flex;gap:5px;flex-wrap:wrap}.dl-loot .lt{font-size:12px;padding:3px 8px;border-radius:9px;background:rgba(0,0,0,.28);border:1px solid color-mix(in srgb,var(--lc) 45%,transparent);color:var(--mute)}.dl-loot .lt b{color:var(--lc)}
+.dl-pend{font-size:13px;padding:7px 10px;border-radius:11px;background:color-mix(in srgb,var(--lc) 14%,rgba(0,0,0,.3));border:1px solid color-mix(in srgb,var(--lc) 55%,transparent);color:var(--ink);text-align:left}
 .slotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .sf{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);font:800 11.5px var(--f-body);min-width:0}
 .sf .ic,.sf .icoimg{width:22px;height:22px}
@@ -906,7 +908,7 @@ img.scene{object-fit:cover;display:block}
 <div id="app"></div>
 <div id="modal" hidden></div>
 <div id="toasts"></div>
-<script>const APPV=91;'use strict';
+<script>const APPV=93;'use strict';
 /* ================= Utilities ================= */
 const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -1140,6 +1142,7 @@ const TALIS=[
   {id:'or',n:"Talisman d'Or",b:'+30 % d’écus.',q:['forgeleg','gold2000','relic1']},
   {id:'pelerin',n:'Talisman du Pèlerin',b:'+1 potion par run.',q:['portal3','sanct3','tav10']},
   {id:'ambre',n:"Talisman d'Ambre",b:'+1 PA à toute l’équipe.',q:['best_0','best_1','best_2','best_3','best_4']},
+  {id:'cadran',n:'Talisman du Cadran',b:'Au début de chaque combat, chaque héros reçoit un bouclier de 6 % de ses PV max pendant 1 tour.',q:['daily1','dailyWin','dailyStreak3','daily5000']},
   {id:'cauchemar',n:'Talisman du Cauchemar',b:'Le premier héros de la formation joue toujours en premier.',q:['star5_0','star5_1','star5_2','star5_3','star5_4']},
 ];
 const QN=(n,s)=>n.toLocaleString('fr-FR')+' '+s;
@@ -1200,6 +1203,10 @@ const QUESTS={
   support50:['Lancer 50 sorts de soutien (sans dégâts)',m=>(m.cnt.support||0)>=50],
   support300:['Lancer 300 sorts de soutien',m=>(m.cnt.support||0)>=300],
   support1000:['Lancer 1 000 sorts de soutien',m=>(m.cnt.support||0)>=1000],
+  daily1:['Terminer un défi du jour',m=>(m.cnt.dailyPlayed||0)>=1],
+  dailyWin:['Gagner un défi du jour',m=>(m.cnt.dailyWins||0)>=1],
+  dailyStreak3:['Relever le défi du jour 3 jours d’affilée',m=>(m.cnt.dailyStreakMax||0)>=3],
+  daily5000:['Atteindre 5 000 points à un défi du jour',m=>(m.cnt.dailyBest||0)>=5000],
 };
 WORLDS.forEach((W,w)=>{QUESTS['best_'+w]=[`Compléter le bestiaire alpha du Monde ${w+1}`,m=>W.roster.every((_,i)=>m.alphas[w+'_'+i])];
   QUESTS['star5_'+w]=[`Gagner le Monde ${w+1} en 5 étoiles`,m=>(m.worlds[w].bestStar||0)>=5]});
@@ -3129,6 +3136,7 @@ function startRun(classes){
   classes.forEach((c,i)=>{const h=newHero(c,WORLDS[w].lv[0]);h.slot=run.heroes.filter(x=>x.row===h.row).length;run.heroes.push(h)});
   // starter gear
   run.heroes.forEach(h=>starterKit(h,WORLDS[w].lv[0],w));
+  applyDailyLoot();
   meta.cnt.runs++;meta.worlds[w].runs++;meta.cnt.maxTeam=Math.max(meta.cnt.maxTeam,run.heroes.length);saveMeta();saveRun()}
 function enterNode(r,i){const nd=run.rows[r][i];run.pos={r,i};run.visited.push(r+':'+i);ui.mapSel=null;
   let t=nd.t;
@@ -3276,6 +3284,7 @@ function startCombat(kind,mod){
   const cnt={};es.forEach(e=>cnt[e.name]=(cnt[e.name]||0)+1);const seen={};es.forEach(e=>{if(cnt[e.name]>1){seen[e.name]=(seen[e.name]||0)+1;e.name+=' '+'ABCDEF'[seen[e.name]-1]}});
   ['front','back'].forEach(r=>es.filter(e=>e.row===r).forEach((e,i)=>e.slot=i));
   run.heroes.forEach(h=>{h.st={};h.used={};h.cd={};h.pc={};h.ptt={};h.tcd={};h.turns=0});
+  if(hasT('cadran'))run.heroes.forEach(h=>h.alive&&tshield(h,maxHp(h)*.06,1));
   run.combat={kind,mod:eMod,L,enemies:es,traps:[],lance:null,aegis:null,order:[],idx:-1,round:0,log:[],cur:null,over:false,anyKO:false};
   run.phase='combat';ui.sel=null;
   if(es.some(e=>e.alpha))toast('Un monstre alpha est apparu !');
@@ -3448,6 +3457,8 @@ const runTools=()=>`<nav class="iconbar" style="margin-bottom:10px">${TOOLS.map(
 function dailyCard(has){const D=dailyCfg(),R=(meta.daily||{})[D.key],M=MODS.find(m=>m.k===D.mod),W=WORLDS[D.w];
   return`<div class="daily"><div class="dl-top"><span class="dl-badge">Défi du jour</span><span class="dl-date">${D.key.split('-').reverse().join('/')}</span></div>
    <div class="dl-mid"><span class="dl-team">${D.cls.map(c=>`<span class="ava sm">${classMed(c)}</span>`).join('')}</span><div><b>${W.n} · ${'★'.repeat(D.star)}</b><small>${CLASSES[D.cls[0]].n} + ${CLASSES[D.cls[1]].n} · tous les combats : ${M.n} (${M.d})</small></div></div>
+   <div class="dl-loot">${LOOTT.map((T,i)=>`<span class="lt" style="--lc:${T.c}"><b>${T.n}</b> ${['jouer','≥ 1 500 pts','gagner'][i]}</span>`).join('')}</div>
+   ${meta.dailyLoot&&!meta.dailyLoot.used?`<div class="dl-pend" style="--lc:${LOOTT[meta.dailyLoot.t].c}">Butin ${LOOTT[meta.dailyLoot.t].n} en attente : ${LOOTT[meta.dailyLoot.t].d}, au départ de ta prochaine run normale.</div>`:''}
    <div class="dl-bot"><span>${R?`Meilleur score : <b>${fmt(R.best)}</b> · ${R.tries} essai${R.tries>1?'s':''}`:'Même carte et même équipe pour tout le monde aujourd’hui.'}</span><button class="btn main sm" data-a="daily" ${has?'disabled':''}>${has?'Run en cours':'Relever'}</button></div></div>`}
 function vHome(){
   const has=run&&run.phase!=='end';const wsel=has?run.w:ui.world;const M=meta.worlds[wsel],W=WORLDS[wsel];
@@ -3621,7 +3632,7 @@ function vMsg(){const m=run.msg;const zi=WORLDS[run.w].zones.findIndex(z=>z[0]==
 function vEnd(){const win=run.result==='win';return`<div class="endscr"><div class="banner">${scene(run.w)}</div>${emblem(win?'trophy':'skull2',!win)}<h2 class="gilt">${win?'Run réussie !':'Défaite'}</h2>
   <p>${win?`${WORLDS[run.w].n} est vaincu en ${'★'.repeat(run.star)}.${run.star<5?' L’étoile suivante est débloquée.':''}`:`L'équipe est tombée dans ${zoneTitle()} (zone ${run.z+1}/${ZONES}). Les héros, l'équipement et les écus sont perdus.`}</p>
   <div class="team" style="width:100%">${run.heroes.map(h=>`<div class="trow">${ava(h,'sm')}<div class="meta"><div class="nm"><b>${h.name}</b>${els(h.cls)}<span class="hpn">niveau ${h.lvl}</span></div></div></div>`).join('')}</div>
-  ${run.daily?`<div class="daily end"><span class="dl-badge">Défi du jour</span><b class="dl-score">${fmt(run.daily.score||0)}</b><small>${(run.daily.score||0)>(run.daily.prev||0)?'Nouveau record du jour !':`Record du jour : ${fmt(run.daily.prev)}`}</small><small class="mute">Zone ${run.z+1} · ${run.daily.kills||0} monstres vaincus · ${fmt(run.gold)} écus</small></div>`:''}
+  ${run.daily?`<div class="daily end"><span class="dl-badge">Défi du jour</span><b class="dl-score">${fmt(run.daily.score||0)}</b><small>${(run.daily.score||0)>(run.daily.prev||0)?'Nouveau record du jour !':`Record du jour : ${fmt(run.daily.prev)}`}</small><small class="mute">Zone ${run.z+1} · ${run.daily.kills||0} monstres vaincus · ${fmt(run.gold)} écus</small>${run.daily.loot!=null?`<div class="dl-pend" style="--lc:${LOOTT[meta.dailyLoot&&meta.dailyLoot.key===run.daily.key?meta.dailyLoot.t:run.daily.loot].c}">Butin du jour : ${LOOTT[meta.dailyLoot&&meta.dailyLoot.key===run.daily.key?meta.dailyLoot.t:run.daily.loot].n} — ${LOOTT[meta.dailyLoot&&meta.dailyLoot.key===run.daily.key?meta.dailyLoot.t:run.daily.loot].d}, à récupérer au départ de ta prochaine run normale.</div>`:''}</div>`:''}
   <p class="mute">Talismans, bestiaire, reliques et succès sont conservés.</p>
   <button class="btn main" data-a="endok">Retour à l'accueil</button></div>`}
 /* Vente groupée : par rareté (dans le filtre actif) + tout vendre (2 touches) */
@@ -3828,10 +3839,20 @@ function withSeed(seed,fn){const old=Math.random;Math.random=seeded(seed);try{re
 function dailyCfg(){const key=todayKey();const s=hashRes('daily-'+key);const rnd=seeded(s);const w=Math.floor(rnd()*meta.unlocked);
   const cls=shuffleR(ORDER.slice(),rnd).slice(0,2);const mods=MODS.filter(m=>m.k!=='nombreux');const mod=mods[Math.floor(rnd()*mods.length)];return{key,seed:s,w,star:3,cls,mod:mod.k}}
 function shuffleR(a,rnd){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function startDaily(){const D=dailyCfg();ui.world=D.w;ui.star=D.star;startRun(D.cls);run.daily={key:D.key,seed:D.seed,mod:D.mod,kills:0};
+function startDaily(){const D=dailyCfg();ui.world=D.w;ui.star=D.star;ui._noLoot=1;try{startRun(D.cls)}finally{ui._noLoot=0}run.daily={key:D.key,seed:D.seed,mod:D.mod,kills:0};
   run.rows=withSeed(D.seed+run.z*977,genMap);meta.daily=meta.daily||{};const R=meta.daily[D.key]=meta.daily[D.key]||{best:0,tries:0};R.tries++;saveMeta();saveRun()}
 function dailyScore(win){const d=run.daily;return(run.z*(MAPR+2)+run.pos.r)*50+(d.kills||0)*10+Math.round(run.gold/10)+(win?3000:0)}
-function dailyEnd(win){if(!run||!run.daily||run.daily.scored)return;const sc=dailyScore(win);run.daily.score=sc;run.daily.scored=1;const R=meta.daily[run.daily.key]=meta.daily[run.daily.key]||{best:0,tries:1};run.daily.prev=R.best;R.best=Math.max(R.best,sc);saveMeta()}
+/* Butin du jour : palier selon le score du défi (bronze = joué, argent ≥ 1 500, or = victoire), utilisé au départ de la prochaine run normale. Non cumulable. */
+const LOOTT=[{k:'b',n:'Bronze',c:'#d08a4a',d:'1 potion + 100 écus'},{k:'s',n:'Argent',c:'#cfd8e0',d:'1 potion + 100 écus + 1 objet rare'},{k:'g',n:'Or',c:'#f4cd4f',d:'1 potion + 100 écus + 1 objet épique ou légendaire'}];
+const lootTier=(sc,win)=>win?2:sc>=1500?1:0;
+function dailyEnd(win){if(!run||!run.daily||run.daily.scored)return;const sc=dailyScore(win);run.daily.score=sc;run.daily.scored=1;const key=run.daily.key;const R=meta.daily[key]=meta.daily[key]||{best:0,tries:1};run.daily.prev=R.best;R.best=Math.max(R.best,sc);
+  const c=meta.cnt;c.dailyPlayed=(c.dailyPlayed||0)+1;if(win)c.dailyWins=(c.dailyWins||0)+1;c.dailyBest=Math.max(c.dailyBest||0,sc);
+  if(c.dailyLastDay!==key){const y=new Date(key+'T12:00:00');y.setDate(y.getDate()-1);const yk=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}`;c.dailyStreak=c.dailyLastDay===yk?(c.dailyStreak||0)+1:1;c.dailyLastDay=key;c.dailyStreakMax=Math.max(c.dailyStreakMax||0,c.dailyStreak)}
+  const t=lootTier(sc,win);run.daily.loot=t;const L=meta.dailyLoot;if(!L||L.used||L.t<t||L.key!==key)meta.dailyLoot={key,t,used:0};
+  saveMeta()}
+function applyDailyLoot(){const L=meta.dailyLoot;if(!L||L.used||ui._noLoot)return;L.used=1;const T=LOOTT[L.t];run.potions++;run.gold+=100;let it=null;
+  if(L.t>=1){it=genItem({tier:tierOf(run.w,0),r:L.t===2?(Math.random()<.5?2:3):1,set:setOf(run.w,0)});addInv(it)}
+  const msg=run.dailyLootMsg=`Butin du jour (${T.n}) : +1 potion, +100 écus${it?', '+it.name+' ('+RAR[it.r].l.toLowerCase()+') dans le sac':''}.`;setTimeout(()=>toast(msg),400);saveMeta()}
 
 /* ================= Save export / import ================= */
 function saveCode(){const data={v:1,meta,run};const json=JSON.stringify(data);return btoa(unescape(encodeURIComponent(json)))}
@@ -3845,7 +3866,7 @@ function shSave(){return sheet('Sauvegarde',`<p class="mute" style="margin:0">Ta
   <label class="btn" style="cursor:pointer">Choisir un fichier<input type="file" id="loadfile" accept=".txt,.rdp,text/plain" hidden></label>
   <button class="btn main" data-a="loadsave">Charger cette sauvegarde</button>
   <p class="mute" style="margin:0;font-size:13px">Charger remplace toute la progression actuelle de ce téléphone.</p>`)}
-const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',quartz:'#e8e2f4',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e'};
+const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',quartz:'#e8e2f4',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e',cadran:'#7fd0e8'};
 /* ================= Sheets ================= */
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
@@ -4055,5 +4076,5 @@ window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?
 function bulkSell(g){if(!g.length)return;const ids=new Set(g.map(x=>x.id));const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>!ids.has(x.id));meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objet${g.length>1?'s':''} vendu${g.length>1?'s':''} : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()}
 
 /* icônes d'emplacement peintes (même DA que le reste) */
-if(typeof PICO!=='undefined'){PICO.ui_arme=PICO.item_1_4_arme;PICO.ui_coiffe=PICO.item_vag_coiffe;PICO.ui_cape=PICO.item_vag_cape;PICO.ui_anneau=PICO.item_vag_anneau}
+if(typeof PICO!=='undefined'){PICO.ui_arme=PICO.item_1_4_arme;PICO.ui_coiffe=PICO.item_vag_coiffe;PICO.ui_cape=PICO.item_vag_cape;PICO.ui_anneau=PICO.item_vag_anneau;if(!TALART.cadran&&PICO.ui_medal)TALART.cadran=`<img class="icoimg" src="${PICO.ui_medal}" alt="" draggable="false">`}
 </script><script>if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=0;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=1;location.reload()}had=1});addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")r.update()})}).catch(()=>{}))}</script>

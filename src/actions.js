@@ -92,4 +92,4 @@ window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?
 function bulkSell(g){if(!g.length)return;const ids=new Set(g.map(x=>x.id));const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>!ids.has(x.id));meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objet${g.length>1?'s':''} vendu${g.length>1?'s':''} : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()}
 
 /* icônes d'emplacement peintes (même DA que le reste) */
-if(typeof PICO!=='undefined'){PICO.ui_arme=PICO.item_1_4_arme;PICO.ui_coiffe=PICO.item_vag_coiffe;PICO.ui_cape=PICO.item_vag_cape;PICO.ui_anneau=PICO.item_vag_anneau}
+if(typeof PICO!=='undefined'){PICO.ui_arme=PICO.item_1_4_arme;PICO.ui_coiffe=PICO.item_vag_coiffe;PICO.ui_cape=PICO.item_vag_cape;PICO.ui_anneau=PICO.item_vag_anneau;if(!TALART.cadran&&PICO.ui_medal)TALART.cadran=`<img class="icoimg" src="${PICO.ui_medal}" alt="" draggable="false">`}

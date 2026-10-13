@@ -61,10 +61,20 @@ function withSeed(seed,fn){const old=Math.random;Math.random=seeded(seed);try{re
 function dailyCfg(){const key=todayKey();const s=hashRes('daily-'+key);const rnd=seeded(s);const w=Math.floor(rnd()*meta.unlocked);
   const cls=shuffleR(ORDER.slice(),rnd).slice(0,2);const mods=MODS.filter(m=>m.k!=='nombreux');const mod=mods[Math.floor(rnd()*mods.length)];return{key,seed:s,w,star:3,cls,mod:mod.k}}
 function shuffleR(a,rnd){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function startDaily(){const D=dailyCfg();ui.world=D.w;ui.star=D.star;startRun(D.cls);run.daily={key:D.key,seed:D.seed,mod:D.mod,kills:0};
+function startDaily(){const D=dailyCfg();ui.world=D.w;ui.star=D.star;ui._noLoot=1;try{startRun(D.cls)}finally{ui._noLoot=0}run.daily={key:D.key,seed:D.seed,mod:D.mod,kills:0};
   run.rows=withSeed(D.seed+run.z*977,genMap);meta.daily=meta.daily||{};const R=meta.daily[D.key]=meta.daily[D.key]||{best:0,tries:0};R.tries++;saveMeta();saveRun()}
 function dailyScore(win){const d=run.daily;return(run.z*(MAPR+2)+run.pos.r)*50+(d.kills||0)*10+Math.round(run.gold/10)+(win?3000:0)}
-function dailyEnd(win){if(!run||!run.daily||run.daily.scored)return;const sc=dailyScore(win);run.daily.score=sc;run.daily.scored=1;const R=meta.daily[run.daily.key]=meta.daily[run.daily.key]||{best:0,tries:1};run.daily.prev=R.best;R.best=Math.max(R.best,sc);saveMeta()}
+/* Butin du jour : palier selon le score du défi (bronze = joué, argent ≥ 1 500, or = victoire), utilisé au départ de la prochaine run normale. Non cumulable. */
+const LOOTT=[{k:'b',n:'Bronze',c:'#d08a4a',d:'1 potion + 100 écus'},{k:'s',n:'Argent',c:'#cfd8e0',d:'1 potion + 100 écus + 1 objet rare'},{k:'g',n:'Or',c:'#f4cd4f',d:'1 potion + 100 écus + 1 objet épique ou légendaire'}];
+const lootTier=(sc,win)=>win?2:sc>=1500?1:0;
+function dailyEnd(win){if(!run||!run.daily||run.daily.scored)return;const sc=dailyScore(win);run.daily.score=sc;run.daily.scored=1;const key=run.daily.key;const R=meta.daily[key]=meta.daily[key]||{best:0,tries:1};run.daily.prev=R.best;R.best=Math.max(R.best,sc);
+  const c=meta.cnt;c.dailyPlayed=(c.dailyPlayed||0)+1;if(win)c.dailyWins=(c.dailyWins||0)+1;c.dailyBest=Math.max(c.dailyBest||0,sc);
+  if(c.dailyLastDay!==key){const y=new Date(key+'T12:00:00');y.setDate(y.getDate()-1);const yk=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}`;c.dailyStreak=c.dailyLastDay===yk?(c.dailyStreak||0)+1:1;c.dailyLastDay=key;c.dailyStreakMax=Math.max(c.dailyStreakMax||0,c.dailyStreak)}
+  const t=lootTier(sc,win);run.daily.loot=t;const L=meta.dailyLoot;if(!L||L.used||L.t<t||L.key!==key)meta.dailyLoot={key,t,used:0};
+  saveMeta()}
+function applyDailyLoot(){const L=meta.dailyLoot;if(!L||L.used||ui._noLoot)return;L.used=1;const T=LOOTT[L.t];run.potions++;run.gold+=100;let it=null;
+  if(L.t>=1){it=genItem({tier:tierOf(run.w,0),r:L.t===2?(Math.random()<.5?2:3):1,set:setOf(run.w,0)});addInv(it)}
+  const msg=run.dailyLootMsg=`Butin du jour (${T.n}) : +1 potion, +100 écus${it?', '+it.name+' ('+RAR[it.r].l.toLowerCase()+') dans le sac':''}.`;setTimeout(()=>toast(msg),400);saveMeta()}
 
 /* ================= Save export / import ================= */
 function saveCode(){const data={v:1,meta,run};const json=JSON.stringify(data);return btoa(unescape(encodeURIComponent(json)))}

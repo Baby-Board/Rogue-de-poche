@@ -232,6 +232,7 @@ const TALIS=[
   {id:'or',n:"Talisman d'Or",b:'+30 % d’écus.',q:['forgeleg','gold2000','relic1']},
   {id:'pelerin',n:'Talisman du Pèlerin',b:'+1 potion par run.',q:['portal3','sanct3','tav10']},
   {id:'ambre',n:"Talisman d'Ambre",b:'+1 PA à toute l’équipe.',q:['best_0','best_1','best_2','best_3','best_4']},
+  {id:'cadran',n:'Talisman du Cadran',b:'Au début de chaque combat, chaque héros reçoit un bouclier de 6 % de ses PV max pendant 1 tour.',q:['daily1','dailyWin','dailyStreak3','daily5000']},
   {id:'cauchemar',n:'Talisman du Cauchemar',b:'Le premier héros de la formation joue toujours en premier.',q:['star5_0','star5_1','star5_2','star5_3','star5_4']},
 ];
 const QN=(n,s)=>n.toLocaleString('fr-FR')+' '+s;
@@ -292,6 +293,10 @@ const QUESTS={
   support50:['Lancer 50 sorts de soutien (sans dégâts)',m=>(m.cnt.support||0)>=50],
   support300:['Lancer 300 sorts de soutien',m=>(m.cnt.support||0)>=300],
   support1000:['Lancer 1 000 sorts de soutien',m=>(m.cnt.support||0)>=1000],
+  daily1:['Terminer un défi du jour',m=>(m.cnt.dailyPlayed||0)>=1],
+  dailyWin:['Gagner un défi du jour',m=>(m.cnt.dailyWins||0)>=1],
+  dailyStreak3:['Relever le défi du jour 3 jours d’affilée',m=>(m.cnt.dailyStreakMax||0)>=3],
+  daily5000:['Atteindre 5 000 points à un défi du jour',m=>(m.cnt.dailyBest||0)>=5000],
 };
 WORLDS.forEach((W,w)=>{QUESTS['best_'+w]=[`Compléter le bestiaire alpha du Monde ${w+1}`,m=>W.roster.every((_,i)=>m.alphas[w+'_'+i])];
   QUESTS['star5_'+w]=[`Gagner le Monde ${w+1} en 5 étoiles`,m=>(m.worlds[w].bestStar||0)>=5]});

@@ -103,6 +103,7 @@ function startRun(classes){
   classes.forEach((c,i)=>{const h=newHero(c,WORLDS[w].lv[0]);h.slot=run.heroes.filter(x=>x.row===h.row).length;run.heroes.push(h)});
   // starter gear
   run.heroes.forEach(h=>starterKit(h,WORLDS[w].lv[0],w));
+  applyDailyLoot();
   meta.cnt.runs++;meta.worlds[w].runs++;meta.cnt.maxTeam=Math.max(meta.cnt.maxTeam,run.heroes.length);saveMeta();saveRun()}
 function enterNode(r,i){const nd=run.rows[r][i];run.pos={r,i};run.visited.push(r+':'+i);ui.mapSel=null;
   let t=nd.t;
@@ -250,6 +251,7 @@ function startCombat(kind,mod){
   const cnt={};es.forEach(e=>cnt[e.name]=(cnt[e.name]||0)+1);const seen={};es.forEach(e=>{if(cnt[e.name]>1){seen[e.name]=(seen[e.name]||0)+1;e.name+=' '+'ABCDEF'[seen[e.name]-1]}});
   ['front','back'].forEach(r=>es.filter(e=>e.row===r).forEach((e,i)=>e.slot=i));
   run.heroes.forEach(h=>{h.st={};h.used={};h.cd={};h.pc={};h.ptt={};h.tcd={};h.turns=0});
+  if(hasT('cadran'))run.heroes.forEach(h=>h.alive&&tshield(h,maxHp(h)*.06,1));
   run.combat={kind,mod:eMod,L,enemies:es,traps:[],lance:null,aegis:null,order:[],idx:-1,round:0,log:[],cur:null,over:false,anyKO:false};
   run.phase='combat';ui.sel=null;
   if(es.some(e=>e.alpha))toast('Un monstre alpha est apparu !');

@@ -1,4 +1,4 @@
-const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',quartz:'#e8e2f4',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e'};
+const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',brise:'#4fd8c4',pierre:'#b08a5a',grenat:'#b8324a',givre:'#9fe3ff',perle:'#f3ead8',agate:'#e0915a',onyx:'#5a5a6a',corail:'#ff7f6a',quartz:'#e8e2f4',rosee:'#6db8ef',or:'#f4cd4f',pelerin:'#b583f2',ambre:'#f2a13a',cauchemar:'#c23a5e',cadran:'#7fd0e8'};
 /* ================= Sheets ================= */
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
