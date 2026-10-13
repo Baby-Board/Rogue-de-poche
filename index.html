@@ -828,7 +828,20 @@ img.scene{object-fit:cover;display:block}
 .fan.round>span .icoimg{border-radius:50%;-webkit-mask:none;mask:none;transform:scale(1.12)}
 .tico{width:52px;height:52px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45,0 4px 8px rgba(0,0,0,.6);background:#1a1110}
 .tico .ic.icimg{width:100%!important;height:100%!important;transform:scale(.88);-webkit-mask:none;mask:none;border-radius:50%}
-.sortbar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.sortbar{display:flex;gap:6px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.slotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.sf{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);font:800 11.5px var(--f-body);min-width:0}
+.sf .ic,.sf .icoimg{width:22px;height:22px}
+.sf span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sf em{font-style:normal;font-size:11px;opacity:.75}
+.sf.on{color:var(--ink);border-color:var(--gold,#e0b04a);box-shadow:0 0 0 1px var(--gold,#e0b04a) inset,0 0 10px rgba(224,176,74,.25)}
+.sf:disabled{opacity:.35}
+.igrp{display:flex;flex-direction:column;gap:6px}
+.igrp.open{padding:6px;margin:0 -6px;border-radius:18px;background:rgba(255,255,255,.035);border:1px dashed var(--line)}
+.ihead .gcount{font:900 15px var(--f-body);color:var(--crit);padding:2px 8px;border-radius:9px;background:rgba(0,0,0,.3)}
+.ihead .gchev{color:var(--mute);font-size:14px;width:12px;text-align:center}
+.gbody .item{padding:7px 10px;gap:5px}.gbody .it-ico{width:32px;height:32px}.gbody .item b{font-size:14px}.gbody .item small{display:none}
+.gbody{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:2px solid var(--line);margin-left:8px}
 .tok{padding-top:16px}.tok.h{padding-top:4px}
 .tok .crown{top:-15px;width:30px;height:19px;z-index:6;background:linear-gradient(180deg,#fff2b8,#ffd25e 45%,#c08a1e);filter:drop-shadow(0 1px 0 #000) drop-shadow(0 0 6px rgba(255,210,94,.8))}
 .tok.e.cur::before{top:-22px}
@@ -3574,7 +3587,7 @@ function vTaverne(){const t=run.tav,full=run.heroes.length>=4;return`${runBar()}
 function vShop(){const s=run.shop;const tab=ui.shopTab;const greens=run.inv.filter(x=>x.r===0);return`${runBar()}<div class="screen">${placeBan('shop')}<div class="head ph">${emblem('shop')}<div><h2 class="gilt">Comptoir</h2><small>Tout est d'occasion, rien n'est maudit</small></div></div>
   <div class="tabs"><button class="tab ${tab==='buy'?'on':''}" data-a="shoptab" data-v="buy">Acheter</button><button class="tab ${tab==='sell'?'on':''}" data-a="shoptab" data-v="sell">Vendre (${run.inv.length})</button></div>
   ${tab==='buy'?`<div class="stack">${s.items.map((x,i)=>`<button class="item ir${x.it.r} ${x.sold?'sold':''}" data-a="buy" data-v="${i}" ${x.sold||run.gold<x.price?'disabled':''}>${itemHTML(x.it,x.sold?'<span class="price">Vendu</span>':price(x.price))}</button>`).join('')}</div>`
-  :`${sortBar()}${greens.length?`<button class="btn" data-a="sellgreen">Vendre tous les objets verts (${greens.length}) · ${coin()} ${fmt(greens.reduce((s,x)=>s+sellPrice(x),0))}</button>`:''}${run.inv.length?`<div class="stack">${sortedInv().map(it=>`<button class="item ir${it.r}" data-a="sell" data-v="${it.id}">${itemHTML(it,price(sellPrice(it)))}</button>`).join('')}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le vendre aussitôt. Les objets équipés ne sont pas listés.</p>`:'<p class="mute">Le sac est vide.</p>'}`}
+  :`${sortBar()}${greens.length?`<button class="btn" data-a="sellgreen">Vendre tous les objets verts (${greens.length}) · ${coin()} ${fmt(greens.reduce((s,x)=>s+sellPrice(x),0))}</button>`:''}${run.inv.length?`<div class="stack">${invList(it=>`<button class="item ir${it.r}" data-a="sell" data-v="${it.id}">${itemHTML(it,price(sellPrice(it)))}</button>`)||'<p class="mute">Aucun objet de ce type.</p>'}</div><p class="mute" style="margin:0;font-size:13.5px">Touche un objet pour le vendre aussitôt. Les objets équipés ne sont pas listés.</p>`:'<p class="mute">Le sac est vide.</p>'}`}
   <div class="dock"><div><button class="btn" data-a="leave">Repartir</button></div></div></div>`}
 function allItems(){const l=run.inv.slice();run.heroes.forEach(h=>Object.values(h.eq).forEach(x=>x&&l.push(x)));return l}
 function vForge(){const l=allItems().filter(x=>x.r<FORGE_MAX).sort((a,b)=>b.tier-a.tier||b.r-a.r);return`${runBar()}<div class="screen">${placeBan('forge')}<div class="head ph">${emblem('forge')}<div><h2 class="gilt">Forge</h2><small>L'enclume chante encore</small></div></div>
@@ -3589,8 +3602,15 @@ function vEnd(){const win=run.result==='win';return`<div class="endscr"><div cla
   ${run.daily?`<div class="daily end"><span class="dl-badge">Défi du jour</span><b class="dl-score">${fmt(run.daily.score||0)}</b><small>${(run.daily.score||0)>(run.daily.prev||0)?'Nouveau record du jour !':`Record du jour : ${fmt(run.daily.prev)}`}</small><small class="mute">Zone ${run.z+1} · ${run.daily.kills||0} monstres vaincus · ${fmt(run.gold)} écus</small></div>`:''}
   <p class="mute">Talismans, bestiaire, reliques et succès sont conservés.</p>
   <button class="btn main" data-a="endok">Retour à l'accueil</button></div>`}
-function sortedInv(){const l=run.inv.slice();const so=Object.keys(SLOTS);if(ui.invSort==='set')return l.sort((a,b)=>(a.setN||'').localeCompare(b.setN||'')||so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
-const sortBar=()=>`<div class="sortbar">${[['tier','Palier'],['type','Type'],['set','Panoplie']].map(([k,l])=>`<button class="tab ${ui.invSort===k?'on':''}" data-a="invsort" data-v="${k}">${l}</button>`).join('')}</div>`;
+function sortedInv(){const so=Object.keys(SLOTS);const f=ui.invSlot;const l=run.inv.filter(x=>!f||x.slot===f);if(ui.invSort==='set')return l.sort((a,b)=>(a.setN||'').localeCompare(b.setN||'')||so.indexOf(a.slot)-so.indexOf(b.slot)||b.r-a.r);return ui.invSort==='type'?l.sort((a,b)=>so.indexOf(a.slot)-so.indexOf(b.slot)||b.tier-a.tier||b.r-a.r):l.sort((a,b)=>b.tier-a.tier||b.r-a.r)}
+const sortBar=()=>{const c={};run.inv.forEach(x=>c[x.slot]=(c[x.slot]||0)+1);
+  return`<div class="slotbar">${[['','Tout',run.inv.length]].concat(Object.keys(SLOTS).map(k=>[k,SLOTS[k],c[k]||0])).map(([k,l,n])=>`<button class="sf ${(ui.invSlot||'')===k?'on':''}" data-a="invslot" data-v="${k}" ${n||!k?'':'disabled'}>${ico(k||'bag')}<span>${l}</span><em>${n}</em></button>`).join('')}</div>
+  <div class="sortbar"><span class="mute" style="margin-right:auto;font-size:13px">Trier :</span>${[['tier','Palier'],['type','Type'],['set','Panoplie']].map(([k,l])=>`<button class="tab ${ui.invSort===k?'on':''}" data-a="invsort" data-v="${k}">${l}</button>`).join('')}</div>`};
+/* Regroupe les objets du même nom : une ligne repliée, touche pour déplier */
+function invList(btn){const l=sortedInv();if(!l.length)return'';const g=[],m={};l.forEach(it=>{if(!m[it.name]){m[it.name]={k:it.name,its:[]};g.push(m[it.name])}m[it.name].its.push(it)});
+  ui.invOpen=ui.invOpen||{};
+  return g.map(G=>{if(G.its.length===1)return btn(G.its[0]);const it=G.its[0],open=ui.invOpen[G.k];const rc={};G.its.forEach(x=>rc[x.r]=(rc[x.r]||0)+1);
+    return`<div class="igrp ${open?'open':''}"><button class="item ir${it.r} ihead" data-a="invgrp" data-v="${encodeURIComponent(G.k)}"><div class="it-top"><span class="it-ico">${itemSvg(it)}</span><div style="min-width:0;flex:1"><b class="r${it.r}">${it.name}</b><small>T${it.tier} · ${SLOTS[it.slot]} · ${Object.keys(rc).sort((a,b)=>b-a).map(r=>`<span class="r${r}">${rc[r]} ${RAR[r].l.toLowerCase()}</span>`).join(', ')}</small></div><span class="gcount">×${G.its.length}</span><span class="gchev">${open?'▴':'▾'}</span></div></button>${open?`<div class="gbody">${G.its.map(btn).join('')}</div>`:''}</div>`}).join('')}
 /* ================= Juice : animations de combat =================
    Le combat est redessiné en entier à chaque action. Les effets vivent donc :
    - dans une couche #fxl (projectiles, particules, chiffres, fantômes), indépendante du DOM du combat ;
@@ -3852,7 +3872,7 @@ function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h)
   <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];return it?itemBtn(it,`<span class="slotlab">${SLOTS[s]}</span>`):`<div class="item" style="opacity:.55;border-style:dashed"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b></div></div>`}).join('')}</div>
   ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
   <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span></div>${sortBar()}
-  <div class="stack">${sortedInv().map(it=>itemBtn(it)).join('')||'<p class="mute">Le sac est vide.</p>'}</div>`)}
+  <div class="stack">${invList(it=>itemBtn(it))||`<p class="mute">${run.inv.length?'Aucun objet de ce type.':'Le sac est vide.'}</p>`}</div>`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
   let diff='';if(f.where==='inv'){const keys=[...new Set(Object.keys(it.st).concat(cur?Object.keys(cur.st):[]))];diff=keys.map(k=>{const d=(it.st[k]||0)-(cur?cur.st[k]||0:0);return d?`<span class="chip ${d>0?'up':'dn'}">${d>0?'+':''}${d} ${STL[k]}</span>`:''}).join('')}
   let wdiff='';if(f.where==='inv'&&it.w){const ca=cur&&cur.w?cur.w:{a:3,b:5};const da=Math.round((it.w.a+it.w.b)/2-(ca.a+ca.b)/2);if(da)wdiff=`<span class="chip ${da>0?'up':'dn'}">${da>0?'+':''}${da} ⚔ moy.</span>`}
@@ -3937,6 +3957,8 @@ const A={
   item:id=>{ui.itemId=id;ui.modal='item';render()},
   invh:i=>{ui.invHero=+i;render()},
   invsort:v=>{ui.invSort=v;render()},
+  invslot:v=>{ui.invSlot=v||null;render()},
+  invgrp:v=>{const k=decodeURIComponent(v);ui.invOpen=ui.invOpen||{};ui.invOpen[k]=!ui.invOpen[k];render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
   unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
   sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`${f.it.name} vendu : +${fmt(p)} écus`);checkQuests();saveMeta();saveRun();render()},

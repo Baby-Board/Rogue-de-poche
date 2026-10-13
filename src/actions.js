@@ -42,6 +42,8 @@ const A={
   item:id=>{ui.itemId=id;ui.modal='item';render()},
   invh:i=>{ui.invHero=+i;render()},
   invsort:v=>{ui.invSort=v;render()},
+  invslot:v=>{ui.invSlot=v||null;render()},
+  invgrp:v=>{const k=decodeURIComponent(v);ui.invOpen=ui.invOpen||{};ui.invOpen[k]=!ui.invOpen[k];render()},
   equip:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);ui.modal=run.phase==='loot'?null:'inv';saveMeta();saveRun();render()},
   unequip:id=>{const f=findItem(id);if(!f||f.where==='inv')return;unequip(f.where,f.it.slot);ui.modal='inv';saveRun();render()},
   sell:id=>{const f=findItem(id);if(!f||f.where!=='inv'||run.phase!=='shop')return;const p=sellPrice(f.it);run.gold+=p;run.inv=run.inv.filter(x=>x.id!==id);meta.cnt.sold++;meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);ui.modal=null;toast(`${f.it.name} vendu : +${fmt(p)} écus`);checkQuests();saveMeta();saveRun();render()},

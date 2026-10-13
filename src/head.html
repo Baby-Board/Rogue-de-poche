@@ -823,7 +823,20 @@ img.scene{object-fit:cover;display:block}
 .fan.round>span .icoimg{border-radius:50%;-webkit-mask:none;mask:none;transform:scale(1.12)}
 .tico{width:52px;height:52px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #071012,0 0 0 3px #c99a45,0 4px 8px rgba(0,0,0,.6);background:#1a1110}
 .tico .ic.icimg{width:100%!important;height:100%!important;transform:scale(.88);-webkit-mask:none;mask:none;border-radius:50%}
-.sortbar{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.sortbar{display:flex;gap:6px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+.slotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.sf{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);font:800 11.5px var(--f-body);min-width:0}
+.sf .ic,.sf .icoimg{width:22px;height:22px}
+.sf span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sf em{font-style:normal;font-size:11px;opacity:.75}
+.sf.on{color:var(--ink);border-color:var(--gold,#e0b04a);box-shadow:0 0 0 1px var(--gold,#e0b04a) inset,0 0 10px rgba(224,176,74,.25)}
+.sf:disabled{opacity:.35}
+.igrp{display:flex;flex-direction:column;gap:6px}
+.igrp.open{padding:6px;margin:0 -6px;border-radius:18px;background:rgba(255,255,255,.035);border:1px dashed var(--line)}
+.ihead .gcount{font:900 15px var(--f-body);color:var(--crit);padding:2px 8px;border-radius:9px;background:rgba(0,0,0,.3)}
+.ihead .gchev{color:var(--mute);font-size:14px;width:12px;text-align:center}
+.gbody .item{padding:7px 10px;gap:5px}.gbody .it-ico{width:32px;height:32px}.gbody .item b{font-size:14px}.gbody .item small{display:none}
+.gbody{display:flex;flex-direction:column;gap:6px;padding-left:10px;border-left:2px solid var(--line);margin-left:8px}
 .tok{padding-top:16px}.tok.h{padding-top:4px}
 .tok .crown{top:-15px;width:30px;height:19px;z-index:6;background:linear-gradient(180deg,#fff2b8,#ffd25e 45%,#c08a1e);filter:drop-shadow(0 1px 0 #000) drop-shadow(0 0 6px rgba(255,210,94,.8))}
 .tok.e.cur::before{top:-22px}

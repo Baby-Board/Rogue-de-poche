@@ -60,7 +60,7 @@ function shInv(){const h=run.heroes[ui.invHero]||run.heroes[0];const S=hstats(h)
   <div class="stack">${Object.keys(SLOTS).map(s=>{const it=h.eq[s];return it?itemBtn(it,`<span class="slotlab">${SLOTS[s]}</span>`):`<div class="item" style="opacity:.55;border-style:dashed"><div class="it-top"><span class="it-ico">${ico(s)}</span><b class="mute">${SLOTS[s]} : vide</b></div></div>`}).join('')}</div>
   ${Object.entries(sets).map(([n,c])=>`<div class="chips"><span class="chip ${c>=4?'g':''}">${n} ${c}/4${c>=4?(minR[n]>=4?' · +2 PA ✓ (mythique ou divine)':' · +1 PA ✓ · tout en mythique ou divin : +2 PA'):' · 4 pièces : +1 PA, +2 en mythique ou divin'}</span></div>`).join('')}
   <div style="display:flex;align-items:center;gap:8px"><span class="lab" style="flex:1">Sac (${run.inv.length})</span></div>${sortBar()}
-  <div class="stack">${sortedInv().map(it=>itemBtn(it)).join('')||'<p class="mute">Le sac est vide.</p>'}</div>`)}
+  <div class="stack">${invList(it=>itemBtn(it))||`<p class="mute">${run.inv.length?'Aucun objet de ce type.':'Le sac est vide.'}</p>`}</div>`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
   let diff='';if(f.where==='inv'){const keys=[...new Set(Object.keys(it.st).concat(cur?Object.keys(cur.st):[]))];diff=keys.map(k=>{const d=(it.st[k]||0)-(cur?cur.st[k]||0:0);return d?`<span class="chip ${d>0?'up':'dn'}">${d>0?'+':''}${d} ${STL[k]}</span>`:''}).join('')}
   let wdiff='';if(f.where==='inv'&&it.w){const ca=cur&&cur.w?cur.w:{a:3,b:5};const da=Math.round((it.w.a+it.w.b)/2-(ca.a+ca.b)/2);if(da)wdiff=`<span class="chip ${da>0?'up':'dn'}">${da>0?'+':''}${da} ⚔ moy.</span>`}
