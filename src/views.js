@@ -44,7 +44,7 @@ function vHome(){
   const tiles=[['talis','Talismans',`${nT} / ${TALIS.length}`,tal],['relics','Reliques',`${nR} / ${WORLDS.length*ZONES}`,rel],['best','Bestiaire',`${nA} alphas`,best],
     ['enc','Classes',`${ORDER.length} classes`,fan(['lame','passeuse','rempart'].map(c=>classMed(c)),'round')],['quests','Succès',`${nQ} / ${Object.keys(QUESTS).length}`,`<span class="tico">${ico('trophy')}</span>`],['rules','Règles','Comment jouer',`<span class="tico">${ico('scroll')}</span>`]];
   return`<div class="home2">
-  <header class="hero2">${scene(wsel)}<div class="hero2-in"><h1 class="gilt">Rogue de Poche</h1><p>Deux rangées, quatre éléments, cinq mondes.</p></div></header>
+  <header class="hero2">${scene(wsel)}<div class="hero2-in"><h1 class="gilt">Rogue de Poche</h1><p>Deux rangées, quatre éléments, cinq mondes. <small style="opacity:.55">v${APPV}</small></p></div></header>
   <section class="wsel" aria-label="Mondes">${WORLDS.map((Wd,i)=>{const Mi=meta.worlds[i],lock=i>=meta.unlocked,sel=i===wsel;const al=Wd.roster.filter((_,k)=>meta.alphas[i+'_'+k]).length,rl=Wd.zones.filter((_,z)=>meta.relics[i+'_'+z]).length;
     return`<button class="wc ${sel?'sel':''} ${lock?'locked':''}" ${lock||has?'disabled':`data-a="world" data-v="${i}"`} aria-pressed="${sel}">
       <span class="wc-art">${scene(i)}</span><span class="wc-num">${['I','II','III','IV','V'][i]}</span>

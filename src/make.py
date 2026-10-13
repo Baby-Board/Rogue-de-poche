@@ -48,11 +48,12 @@ order='data.js art.js portraits.js itemicons.js art2.js art3.js paint.js logic.j
 js=''.join(open(os.path.join(S,f),encoding='utf8').read() for f in order)
 open('/tmp/rdp-check.js','w',encoding='utf8').write(js)
 subprocess.run(['node','--check','/tmp/rdp-check.js'],check=True)
+p=os.path.join(R,'sw.js');t=open(p).read();n=int(re.search(r"rdp-v(\d+)",t).group(1))+1;open(p,'w').write(re.sub(r"rdp-v\d+","rdp-v%d"%n,t))
+js='const APPV=%d;'%n+js
 html=open(os.path.join(S,'head.html'),encoding='utf8').read()+'<script>'+js+'</script>'
 pre='<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
 head='<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0b1a19"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-180.png"><meta name="mobile-web-app-capable" content="yes">'
-sw='<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>'
+sw='<script>if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=0;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=1;location.reload()}had=1});addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")r.update()})}).catch(()=>{}))}</script>'
 open(os.path.join(R,'index.html'),'w',encoding='utf8').write(pre+html.replace('</title>','</title>'+head,1)+sw)
 if '--out' in sys.argv:open(sys.argv[sys.argv.index('--out')+1],'w',encoding='utf8').write(html)
-p=os.path.join(R,'sw.js');t=open(p).read();n=int(re.search(r"rdp-v(\d+)",t).group(1))+1;open(p,'w').write(re.sub(r"rdp-v\d+","rdp-v%d"%n,t))
 print('OK',len(paint),'portraits,',len(ban),'bannières,',len(ico),'icônes, cache v%d'%n)

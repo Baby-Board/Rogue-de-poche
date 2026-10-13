@@ -89,7 +89,7 @@ function shInspect(){const u=unit(ui.inspect);if(!u)return null;
    <div class="splist">${spellIds(u).map(id=>spellLine(id,spellOf(u,id),u)).join('')}</div></div>`)}
 function shMenu(){return sheet('Menu',`<div class="iconbar" style="flex-wrap:wrap">${TOOLS.concat([['rules','scroll','Règles']]).map(([k,i,l])=>`<button class="ib" data-a="sheet" data-v="${k}">${ico(i)}${l}</button>`).join('')}</div>
   <button class="btn" data-a="sheet" data-v="save">Sauvegarde</button>
-  <button class="btn" data-a="home">${ico('home')} Retour à l'accueil</button><button class="btn danger" data-a="menuabandon">Abandonner la run</button><p class="mute" style="margin:0;font-size:13px">La run est enregistrée à chaque action.</p>`)}
+  <button class="btn" data-a="home">${ico('home')} Retour à l'accueil</button><button class="btn danger" data-a="menuabandon">Abandonner la run</button><p class="mute" style="margin:0;font-size:13px">La run est enregistrée à chaque action. · Version ${APPV}</p>`)}
 
 function shSpell(){const c=C();const h=c&&unit(c.cur);if(!h||h.side!=='h')return null;const id=ui.spInfo,S=spellOf(h,id);if(!S)return null;
   const foe=foesOf(h).find(e=>e.row==='front')||foesOf(h)[0];const rg=spellRange(h,S,S.heal?null:foe);const br=blockReason(h,id);

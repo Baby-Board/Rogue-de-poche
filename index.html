@@ -896,7 +896,7 @@ img.scene{object-fit:cover;display:block}
 <div id="app"></div>
 <div id="modal" hidden></div>
 <div id="toasts"></div>
-<script>'use strict';
+<script>const APPV=85;'use strict';
 /* ================= Utilities ================= */
 const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -3451,7 +3451,7 @@ function vHome(){
   const tiles=[['talis','Talismans',`${nT} / ${TALIS.length}`,tal],['relics','Reliques',`${nR} / ${WORLDS.length*ZONES}`,rel],['best','Bestiaire',`${nA} alphas`,best],
     ['enc','Classes',`${ORDER.length} classes`,fan(['lame','passeuse','rempart'].map(c=>classMed(c)),'round')],['quests','Succès',`${nQ} / ${Object.keys(QUESTS).length}`,`<span class="tico">${ico('trophy')}</span>`],['rules','Règles','Comment jouer',`<span class="tico">${ico('scroll')}</span>`]];
   return`<div class="home2">
-  <header class="hero2">${scene(wsel)}<div class="hero2-in"><h1 class="gilt">Rogue de Poche</h1><p>Deux rangées, quatre éléments, cinq mondes.</p></div></header>
+  <header class="hero2">${scene(wsel)}<div class="hero2-in"><h1 class="gilt">Rogue de Poche</h1><p>Deux rangées, quatre éléments, cinq mondes. <small style="opacity:.55">v${APPV}</small></p></div></header>
   <section class="wsel" aria-label="Mondes">${WORLDS.map((Wd,i)=>{const Mi=meta.worlds[i],lock=i>=meta.unlocked,sel=i===wsel;const al=Wd.roster.filter((_,k)=>meta.alphas[i+'_'+k]).length,rl=Wd.zones.filter((_,z)=>meta.relics[i+'_'+z]).length;
     return`<button class="wc ${sel?'sel':''} ${lock?'locked':''}" ${lock||has?'disabled':`data-a="world" data-v="${i}"`} aria-pressed="${sel}">
       <span class="wc-art">${scene(i)}</span><span class="wc-num">${['I','II','III','IV','V'][i]}</span>
@@ -3926,7 +3926,7 @@ function shInspect(){const u=unit(ui.inspect);if(!u)return null;
    <div class="splist">${spellIds(u).map(id=>spellLine(id,spellOf(u,id),u)).join('')}</div></div>`)}
 function shMenu(){return sheet('Menu',`<div class="iconbar" style="flex-wrap:wrap">${TOOLS.concat([['rules','scroll','Règles']]).map(([k,i,l])=>`<button class="ib" data-a="sheet" data-v="${k}">${ico(i)}${l}</button>`).join('')}</div>
   <button class="btn" data-a="sheet" data-v="save">Sauvegarde</button>
-  <button class="btn" data-a="home">${ico('home')} Retour à l'accueil</button><button class="btn danger" data-a="menuabandon">Abandonner la run</button><p class="mute" style="margin:0;font-size:13px">La run est enregistrée à chaque action.</p>`)}
+  <button class="btn" data-a="home">${ico('home')} Retour à l'accueil</button><button class="btn danger" data-a="menuabandon">Abandonner la run</button><p class="mute" style="margin:0;font-size:13px">La run est enregistrée à chaque action. · Version ${APPV}</p>`)}
 
 function shSpell(){const c=C();const h=c&&unit(c.cur);if(!h||h.side!=='h')return null;const id=ui.spInfo,S=spellOf(h,id);if(!S)return null;
   const foe=foesOf(h).find(e=>e.row==='front')||foesOf(h)[0];const rg=spellRange(h,S,S.heal?null:foe);const br=blockReason(h,id);
@@ -4029,4 +4029,4 @@ try{window.claude?.hot?.snapshot?.(()=>({run,screen:ui.screen}))}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 
 function bulkSell(g){if(!g.length)return;const ids=new Set(g.map(x=>x.id));const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>!ids.has(x.id));meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objet${g.length>1?'s':''} vendu${g.length>1?'s':''} : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()}
-</script><script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
+</script><script>if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=0;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=1;location.reload()}had=1});addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")r.update()})}).catch(()=>{}))}</script>
