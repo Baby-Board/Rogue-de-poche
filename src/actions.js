@@ -41,7 +41,7 @@ const A={
   sellall:()=>{if(run.phase!=='shop')return;if(!ui.sellAll){ui.sellAll=1;render();clearTimeout(ui._sat);ui._sat=setTimeout(()=>{ui.sellAll=0;render()},3000);return}ui.sellAll=0;bulkSell(sortedInv())},
   shoptab:v=>{ui.shopTab=v;render()},
   buy:i=>{const x=run.shop.items[+i];if(x.sold||run.gold<x.price)return;run.gold-=x.price;meta.cnt.spent+=x.price;meta.cnt.bought++;x.sold=true;addInv(x.it);toast(x.it.name+' ajouté au sac');checkQuests();saveMeta();saveRun();render()},
-  slotpick:k=>{ui.slotK=k;ui.modal='slot';render()},
+  slotpick:k=>{if(ui.modal!=='slot'&&ui._ms)ui._ms.slot=0;ui.slotK=k;ui.modal='slot';render()},
   swap:id=>{const f=findItem(id);const h=run.heroes[ui.invHero]||run.heroes[0];if(!f||f.where!=='inv')return;equip(h,f.it);toast(`${h.name} équipe ${f.it.name}`);saveMeta();saveRun();render()},
   item:id=>{ui.itemId=id;ui.modal='item';render()},
   invh:i=>{ui.invHero=+i;render()},

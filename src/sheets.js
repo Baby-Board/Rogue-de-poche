@@ -2,11 +2,14 @@ const TALC={mousse:'#5fcf86',lierre:'#3fae5a',lune:'#d6dcf0',braise:'#f2704a',br
 /* ================= Sheets ================= */
 function sheet(title,body){return`<div class="sheet" role="dialog" aria-label="${title}"><header><h3 class="gilt">${title}</h3><button class="ibtn" data-a="close" aria-label="Fermer">${ico('close')}</button></header>${body}</div>`}
 function renderModal(){
-  const m=ui.modal;if(!m){modal.hidden=true;modal.innerHTML='';return}
+  /* garde la position de défilement : même fiche re-rendue, ou retour au sac depuis une fiche objet */
+  const ms=ui._ms||(ui._ms={}),pm=ui._lastModal,old=modal.querySelector('.sheet');if(old&&pm)ms[pm]=old.scrollTop;
+  const m=ui.modal;ui._lastModal=m;if(!m){ui._ms={};modal.hidden=true;modal.innerHTML='';return}
   const f={save:shSave,relics:shRelics,rules:shRules,talis:shTalis,best:shBest,enc:shEnc,quests:shQuests,stats:shStats,form:shForm,inv:shInv,item:shItem,slot:shSlot,potion:shPotion,log:shLog,inspect:shInspect,menu:shMenu,spell:shSpell}[m];
   if(!f||(['stats','form','inv','item','potion','log','inspect','menu','spell'].includes(m)&&!run)){ui.modal=null;modal.hidden=true;return}
   const out=f();if(!out){ui.modal=null;modal.hidden=true;return}
-  modal.innerHTML=out;modal.hidden=false}
+  modal.innerHTML=out;modal.hidden=false;
+  const ns=modal.querySelector('.sheet');if(ns&&(m===pm||m==='inv'||m==='slot')&&ms[m])ns.scrollTop=ms[m]}
 function shRules(){return sheet('Règles',`<div class="rules">
  <h4>La run</h4><p>Une run se joue dans un monde, qui couvre une tranche de niveaux. Chaque monde enchaîne 6 zones ; chaque zone est une carte qu'on traverse jusqu'au donjon. Battre le boss du donjon ouvre la zone suivante ; battre le dernier boss gagne la run. Tu pars avec deux héros et tu peux en recruter d'autres en taverne, jusqu'à quatre.</p>
  <h4>Les PV</h4><p>Les PV ne remontent pas entre deux combats. Pour se soigner : la taverne (la moitié des PV max, et relève les K.O.), les potions, et la victoire contre un boss de donjon, qui remet toute l'équipe sur pied. Si toute l'équipe tombe, la run s'arrête : tu perds les héros, l'équipement et les écus.</p>
