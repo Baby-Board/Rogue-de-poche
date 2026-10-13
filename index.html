@@ -835,6 +835,15 @@ img.scene{object-fit:cover;display:block}
 .sb b{font-size:13.5px;white-space:nowrap}.sb small{font-size:12px}.sellbulk.wide{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.sb .sbn{white-space:normal;text-align:center;line-height:1.15}.sb span{display:inline-flex;align-items:center;gap:3px;font-weight:900;color:var(--crit)}.sb .ic{width:14px;height:14px}
 .setbar{display:flex;gap:5px;flex-wrap:wrap;margin-top:-2px}.setbar::-webkit-scrollbar{display:none}.setbar .tab{font-size:13px;padding:5px 10px;white-space:nowrap}.setbar em{font-style:normal;opacity:.6;font-size:12px}
 .slotn{font-style:normal;font-size:10.5px;letter-spacing:0;color:var(--r1);text-transform:none;font-family:var(--f-body)}.item .slotlab{text-align:right;line-height:1.3}
+.item .it-ico .ic.icimg{width:100%;height:100%;transform:none;-webkit-mask:none;mask:none;border-radius:12px}
+.sf .ic.icimg{width:30px;height:30px;transform:none;-webkit-mask:radial-gradient(circle,#000 60%,transparent 72%);mask:radial-gradient(circle,#000 60%,transparent 72%)}
+.slottabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px 6px;border-radius:14px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);min-width:0}
+.stab i{width:42px;height:42px;border-radius:12px;overflow:hidden;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--rc,#3c5a52),0 2px 4px rgba(0,0,0,.5);background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.12),rgba(0,0,0,.35))}
+.stab i>*{width:100%;height:100%}.stab i .ic.icimg{transform:none;-webkit-mask:none;mask:none;border-radius:12px}
+.stab.ir0{--rc:var(--r0)}.stab.ir1{--rc:var(--r1)}.stab.ir2{--rc:var(--r2)}.stab.ir3{--rc:var(--r3)}.stab.ir4{--rc:var(--r4)}.stab.ir5{--rc:var(--r5)}
+.stab span{font:800 12.5px var(--f-body);color:var(--ink)}.stab em{font-style:normal;font-size:10.5px;white-space:nowrap}
+.stab.on{border-color:var(--gold,#e0b04a);box-shadow:0 0 0 1px var(--gold,#e0b04a) inset,0 0 10px rgba(224,176,74,.25)}
 .slotbar{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
 .sf{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px 5px;border-radius:12px;border:1px solid var(--line);background:var(--plaque);color:var(--mute);font:800 11.5px var(--f-body);min-width:0}
 .sf .ic,.sf .icoimg{width:22px;height:22px}
@@ -897,7 +906,7 @@ img.scene{object-fit:cover;display:block}
 <div id="app"></div>
 <div id="modal" hidden></div>
 <div id="toasts"></div>
-<script>const APPV=87;'use strict';
+<script>const APPV=88;'use strict';
 /* ================= Utilities ================= */
 const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -3905,6 +3914,7 @@ function shSlot(){const h=run.heroes[ui.invHero]||run.heroes[0];const k=ui.slotK
   const l=run.inv.filter(x=>x.slot===k).map(it=>({it,g:gain(it)})).sort((a,b)=>b.g-a.g||b.it.r-a.it.r||b.it.tier-a.it.tier);
   const chip=g=>`<span class="chip ${g>0?'up':g<0?'dn':''}" style="font-weight:900;margin-left:auto;white-space:nowrap">${g>0?'+':''}${g} %</span>`;
   return sheet(SLOTS[k]+' · '+h.name,`<div class="tabs">${run.heroes.map((x,i)=>`<button class="tab ${x===h?'on':''}" data-a="invh" data-v="${i}">${ava(x,'sm')} ${x.name}</button>`).join('')}</div>
+  <div class="slottabs">${Object.keys(SLOTS).map(s=>{const e=h.eq[s],n=run.inv.filter(x=>x.slot===s).length;return`<button class="stab ${s===k?'on':''} ${e?'ir'+e.r:''}" data-a="slotpick" data-v="${s}"><i>${e?itemSvg(e):ico(s)}</i><span>${SLOTS[s]}</span><em>${n?n+' dans le sac':'—'}</em></button>`}).join('')}</div>
   <span class="lab">Équipé</span>${cur?`<div class="item ir${cur.r}">${itemHTML(cur)}</div><button class="btn" data-a="unequip" data-v="${cur.id}">Retirer</button>`:'<p class="mute" style="margin:0">Rien dans cet emplacement.</p>'}
   <span class="lab">Dans le sac (${l.length})</span>${l.length?`<p class="mute" style="margin:0;font-size:13px">Le % indique le changement de dégâts des sorts. Touche un objet pour l'équiper.</p><div class="stack">${l.map(({it,g})=>`<button class="item ir${it.r}" data-a="swap" data-v="${it.id}">${itemHTML(it,chip(g))}</button>`).join('')}</div>`:`<p class="mute" style="margin:0">Aucune ${SLOTS[k].toLowerCase()} dans le sac.</p>`}`)}
 function shItem(){const f=findItem(ui.itemId);if(!f)return null;const it=f.it;const h=run.heroes[ui.invHero]||run.heroes[0];const cur=h.eq[it.slot];
@@ -4040,4 +4050,7 @@ try{window.claude?.hot?.snapshot?.(()=>({run,screen:ui.screen}))}catch(e){}
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 
 function bulkSell(g){if(!g.length)return;const ids=new Set(g.map(x=>x.id));const p=g.reduce((s,x)=>s+sellPrice(x),0);run.gold+=p;meta.cnt.sold+=g.length;run.inv=run.inv.filter(x=>!ids.has(x.id));meta.cnt.maxGold=Math.max(meta.cnt.maxGold,run.gold);toast(`${g.length} objet${g.length>1?'s':''} vendu${g.length>1?'s':''} : +${fmt(p)} ✦`);checkQuests();saveMeta();saveRun();render()}
+
+/* icônes d'emplacement peintes (même DA que le reste) */
+if(typeof PICO!=='undefined'){PICO.ui_arme=PICO.item_1_4_arme;PICO.ui_coiffe=PICO.item_vag_coiffe;PICO.ui_cape=PICO.item_vag_cape;PICO.ui_anneau=PICO.item_vag_anneau}
 </script><script>if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=0;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=1;location.reload()}had=1});addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update();document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")r.update()})}).catch(()=>{}))}</script>
